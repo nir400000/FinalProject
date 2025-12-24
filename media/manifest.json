@@ -1,5 +1,5 @@
 {
-  "name": "Baby Monitor",
+  "name": "Baby_Monitor", 
   "short_name": "Monitor",
   "start_url": "/media/index.html",
   "display": "standalone",
