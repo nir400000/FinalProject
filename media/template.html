@@ -9,29 +9,32 @@
   <link rel="manifest" href="/media/manifest.json">
   <meta name="theme-color" content="#000000">
 
-  <style>
-    body {
-      margin: 0;
-      background: black;
-      overflow: hidden;
-      font-family: Arial, sans-serif;
-    }
-    img {
-      width: 100vw;
-      height: 100vh;
-      object-fit: contain;
-    }
-    #status {
-      position: absolute;
-      top: 10px;
-      left: 10px;
-      color: white;
-      background: rgba(0,0,0,0.5);
-      padding: 6px 10px;
-      border-radius: 6px;
-      font-size: 14px;
-    }
-  </style>
+<style>
+  html, body {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    background-color: black;
+    overflow: hidden;
+  }
+  #stream {
+    width: 100vw;
+    height: 100vh;
+    object-fit: contain; /* אפשר גם cover אם רוצים למלא את המסך */
+  }
+  #status {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    color: white;
+    background: rgba(0,0,0,0.5);
+    padding: 5px 10px;
+    border-radius: 5px;
+    font-size: 14px;
+  }
+</style>
+
 </head>
 
 <body>

@@ -1,7 +1,7 @@
 {
   "name": "Baby_Monitor", 
   "short_name": "Monitor",
-  "start_url": "/media/index.html",
+  "start_url": "/media/template.html",
   "display": "standalone",
   "background_color": "#000000",
   "theme_color": "#000000",
