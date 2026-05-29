@@ -56,3 +56,10 @@ The system integrates machine learning models to:
 - Classify baby crying  
 
 
+/home/nir/Desktop/server/web_server.py
+
+to manualy stop or start the auto started web_server 
+bash:
+sudo systemctl stop webserver.service
+
+sudo systemctl start webserver.service

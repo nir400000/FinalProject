@@ -5,6 +5,7 @@ import numpy as np
 import math
 from ultralytics import YOLO
 import threading
+import time
 
 
 app = Flask(__name__, static_folder='media', static_url_path='/media')
@@ -18,7 +19,60 @@ camera.start()
 
 # --- MODEL SETUP ---
 # Load the Nano model (fastest for Pi). It will download automatically on first run.
-model = YOLO('yolov8n-pose.pt') 
+model = YOLO('yolov8n-pose.pt')
+
+# Global state for threaded inference
+_inference_state = {
+    'frame_for_inference': None,
+    'last_kps': [],
+    'last_label': 'unknown',
+    'stop_event': threading.Event(),
+    'state_lock': threading.Lock(),
+    'worker': None
+}
+
+def _inference_worker():
+    """Background thread that runs YOLO inference on resized frames."""
+    inference_size = (320, 240)
+    min_inference_interval = 0.08
+    last_infer = 0.0
+    
+    while not _inference_state['stop_event'].is_set():
+        img = None
+        with _inference_state['state_lock']:
+            if _inference_state['frame_for_inference'] is not None:
+                img = _inference_state['frame_for_inference']
+                orig_w = _inference_state['frame_w']
+                orig_h = _inference_state['frame_h']
+                _inference_state['frame_for_inference'] = None
+        
+        if img is None:
+            time.sleep(0.005)
+            continue
+        
+        now = time.time()
+        if now - last_infer < min_inference_interval:
+            continue
+        last_infer = now
+        
+        small = cv2.resize(img, inference_size)
+        try:
+            results = model(small, verbose=False)
+        except Exception:
+            continue
+        
+        kps_small = get_yolo_keypoints(results)
+        scaled_kps = []
+        if kps_small:
+            sx = orig_w / inference_size[0]
+            sy = orig_h / inference_size[1]
+            for x, y, c in kps_small:
+                scaled_kps.append((x * sx, y * sy, c))
+        
+        lbl = classify_pose(scaled_kps)
+        with _inference_state['state_lock']:
+            _inference_state['last_kps'] = scaled_kps
+            _inference_state['last_label'] = lbl 
 
 def get_yolo_keypoints(results):
     """
@@ -91,7 +145,7 @@ def classify_pose(kps):
     # Knee Angle Calculation
     knee_angles = []
     for hip, knee, ankle in zip(h_pts, k_pts, a_pts):
-        # Check confidence (YOLO confidence is index 2)
+        # Check confidence (YOLO confidence is index 2)19
         if hip[2] > 0.5 and knee[2] > 0.5 and ankle[2] > 0.5:
             knee_angles.append(joint_angle(hip, knee, ankle))
     
@@ -105,28 +159,48 @@ def classify_pose(kps):
     return 'standing'
 
 def generate_frames():
+    one_in_Xframes = 1
+    frame_count = 0
+    last_display_time = time.time()
+    fps = 0.0
+    
+    # Start inference worker if not running
+    if _inference_state['worker'] is None or not _inference_state['worker'].is_alive():
+        _inference_state['stop_event'].clear()
+        _inference_state['worker'] = threading.Thread(target=_inference_worker, daemon=True)
+        _inference_state['worker'].start()
+    
     while True:
         # Capture frame (Format is XRGB, 4 channels)
         frame_xrgb = camera.capture_array()
-        
-        # Drop the alpha/padding channel to get standard BGR for YOLO/OpenCV
-        # Force memory to be contiguous so OpenCV can write on it
         frame_bgr = np.ascontiguousarray(frame_xrgb[:, :, :3])
         
-        # Run YOLO inference
-        # verbose=False keeps the terminal clean
-        results = model(frame_bgr, verbose=False) 
+        # Post frame for inference worker
+        if frame_count % one_in_Xframes == 0:
+            with _inference_state['state_lock']:
+                _inference_state['frame_for_inference'] = frame_bgr.copy()
+                _inference_state['frame_w'] = frame_bgr.shape[1]
+                _inference_state['frame_h'] = frame_bgr.shape[0]
         
-        # Extract data
-        kps = get_yolo_keypoints(results)
-        label = classify_pose(kps)
-
-        # Draw Visualization
-        # YOLO has a built-in plotter if you want fancy skeletons:
-        # frame_bgr = results[0].plot() 
-        # OR stick to your simple text:
+        frame_count += 1
+        
+        # Measure FPS
+        now_display = time.time()
+        dt = now_display - last_display_time
+        if dt > 0:
+            inst_fps = 1.0 / dt
+            fps = fps * 0.9 + inst_fps * 0.1 if fps else inst_fps
+        last_display_time = now_display
+        
+        # Get latest inference results
+        with _inference_state['state_lock']:
+            label = _inference_state['last_label']
+        
+        # Draw text
         cv2.putText(frame_bgr, f"Status: {label}", (10, 50), 
                     cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
+        cv2.putText(frame_bgr, f"{fps:.1f}", (10, 470), 
+                    cv2.FONT_HERSHEY_SIMPLEX, 0.4, (255, 0, 0), 1)
 
         # Encode for web streaming
         ret, buffer = cv2.imencode('.jpg', frame_bgr)
@@ -142,12 +216,8 @@ def video_feed():
 
 @app.route('/pose')
 def pose_json():
-    frame_xrgb = camera.capture_array()
-    frame_bgr = frame_xrgb[:, :, :3]
-    
-    results = model(frame_bgr, verbose=False)
-    kps = get_yolo_keypoints(results)
-    label = classify_pose(kps)
+    with _inference_state['state_lock']:
+        label = _inference_state['last_label']
     return jsonify({'pose': label})
 
 @app.route('/')
@@ -155,5 +225,10 @@ def home():
     return '<h1>Baby Monitor</h1><img src="/video_feed" style="width:640px; height:480px;" />'
 
 if __name__ == '__main__':
-    # Threaded=True is important for Flask with Video Streaming
-    app.run(host='0.0.0.0', port=5001, threaded=True)
+    try:
+        # Threaded=True is important for Flask with Video Streaming
+        app.run(host='0.0.0.0', port=5001, threaded=True)
+    finally:
+        _inference_state['stop_event'].set()
+        if _inference_state['worker']:
+            _inference_state['worker'].join(timeout=1.0)
