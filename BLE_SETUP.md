@@ -39,3 +39,4 @@ python3 -c "from ble_wifi_provision import run_ble_provisioning_server; run_ble_
 - **`characteristic_value` / notify errors**: update `ble_wifi_provision.py` to the latest version (uses `set_value()`).
 - **Scan empty**: move the Pi closer to routers; run `nmcli dev wifi list` manually.
 - **Connect fails**: check password; open networks leave password empty in the app.
+- **`key-mgmt: property is missing`**: update `wifi_manager.py` (sets `wifi-sec.key-mgmt` explicitly) and remove old profiles with `nmcli connection show` / `nmcli connection delete <name>`.

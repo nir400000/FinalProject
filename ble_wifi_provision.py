@@ -113,6 +113,7 @@ class ProvisionServer:
             data = json.loads(raw.decode("utf-8"))
             ssid = str(data.get("ssid", "")).strip()
             password = str(data.get("password", ""))
+            security = str(data.get("security", "")).strip()
         except json.JSONDecodeError:
             self._set_status("error", "Invalid credentials payload")
             return
@@ -122,7 +123,7 @@ class ProvisionServer:
             return
 
         self._set_status("connecting", f"Connecting to {ssid}...")
-        ok, message = connect_network(ssid, password)
+        ok, message = connect_network(ssid, password, security)
         if not ok:
             self._set_status("error", message or "Connection failed")
             return
