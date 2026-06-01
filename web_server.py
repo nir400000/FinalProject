@@ -226,6 +226,13 @@ def home():
 
 if __name__ == '__main__':
     try:
+        try:
+            from ble_wifi_provision import start_ble_provisioning_thread
+            start_ble_provisioning_thread()
+            print('BLE Wi-Fi provisioning started (advertising as BabyMonitor)')
+        except Exception as ble_exc:
+            print(f'BLE Wi-Fi provisioning not available: {ble_exc}')
+
         # Threaded=True is important for Flask with Video Streaming
         app.run(host='0.0.0.0', port=5001, threaded=True)
     finally:

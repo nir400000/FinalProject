@@ -1,0 +1,2 @@
+# BLE Wi-Fi provisioning (install on Raspberry Pi)
+bluezero>=0.7.1
