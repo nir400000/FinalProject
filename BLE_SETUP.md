@@ -16,6 +16,23 @@ pip install -r requirements-ble.txt
 
 Ensure NetworkManager manages Wi-Fi (`nmcli dev status`).
 
+### Headless Bluetooth pairing (no keyboard on the Pi)
+
+The server registers a **NoInputNoOutput** BlueZ agent so the Pi auto-accepts pairing.
+You should only need to tap **Pair** on the phone once — not confirm matching codes on the monitor.
+
+Optional (recommended), add to `/etc/bluetooth/main.conf` under `[General]`:
+
+```ini
+JustWorksRepairing = always
+```
+
+Then restart Bluetooth:
+
+```bash
+sudo systemctl restart bluetooth
+```
+
 ## Run
 
 Start the server as usual:
@@ -40,3 +57,4 @@ python3 -c "from ble_wifi_provision import run_ble_provisioning_server; run_ble_
 - **Scan empty**: move the Pi closer to routers; run `nmcli dev wifi list` manually.
 - **Connect fails**: check password; open networks leave password empty in the app.
 - **`key-mgmt: property is missing`**: update `wifi_manager.py` (sets `wifi-sec.key-mgmt` explicitly) and remove old profiles with `nmcli connection show` / `nmcli connection delete <name>`.
+- **Pairing asks for matching codes on Pi and phone**: copy `ble_pairing_agent.py` and updated `ble_wifi_provision.py`; restart the server. Run as a user in the `bluetooth` group or test with `sudo` once.

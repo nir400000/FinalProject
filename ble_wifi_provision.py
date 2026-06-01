@@ -22,6 +22,7 @@ from provisioning_constants import (
     DEVICE_LOCAL_NAME,
     SERVICE_UUID,
 )
+from ble_pairing_agent import start_headless_pairing_agent
 from wifi_manager import connect_network, get_primary_ip, networks_to_json, scan_networks
 
 logger = logging.getLogger(__name__)
@@ -151,6 +152,14 @@ class ProvisionServer:
             raise RuntimeError("No Bluetooth adapter found")
 
         adapter_address = adapters[0].address
+
+        try:
+            start_headless_pairing_agent()
+        except Exception:
+            logger.exception(
+                "Headless pairing agent not started; pairing may require a keyboard"
+            )
+
         self.ble = peripheral.Peripheral(adapter_address, local_name=DEVICE_LOCAL_NAME)
         self.ble.add_service(srv_id=SVC_ID, uuid=SERVICE_UUID, primary=True)
 
