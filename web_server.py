@@ -214,6 +214,18 @@ def video_feed():
                     mimetype='multipart/x-mixed-replace; boundary=frame')
     
 
+@app.route('/health')
+def health():
+    """Lightweight check that the phone can reach the monitor over Wi-Fi."""
+    from wifi_manager import get_primary_ip
+
+    return jsonify({
+        'status': 'ok',
+        'ip': get_primary_ip(),
+        'port': 5001,
+    })
+
+
 @app.route('/pose')
 def pose_json():
     with _inference_state['state_lock']:

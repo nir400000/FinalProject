@@ -128,7 +128,7 @@ class ProvisionServer:
             self._set_status("error", message or "Connection failed")
             return
 
-        time.sleep(2)
+        time.sleep(3)
         ip = get_primary_ip()
         with self.lock:
             self.device_ip = ip

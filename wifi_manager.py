@@ -228,20 +228,27 @@ def connect_network(
     return False, last_error or "Connection failed"
 
 
+def _extract_ipv4(text: str) -> str:
+    match = re.search(r"\b(\d{1,3}(?:\.\d{1,3}){3})\b", text)
+    return match.group(1) if match else ""
+
+
 def get_primary_ip() -> str:
     """Best-effort IPv4 address for the wireless interface."""
     ifname = get_wifi_interface()
     result = _run(["nmcli", "-t", "-f", "IP4.ADDRESS", "dev", "show", ifname], timeout=10)
     for line in result.stdout.splitlines():
-        if "IP4.ADDRESS" in line:
-            value = line.split(":")[-1].strip()
-            if value:
-                return value.split("/")[0]
+        if "IP4.ADDRESS" not in line:
+            continue
+        ip = _extract_ipv4(line)
+        if ip and not ip.startswith("127."):
+            return ip
 
     result = _run(["hostname", "-I"], timeout=10)
     for token in result.stdout.split():
-        if "." in token:
-            return token
+        ip = _extract_ipv4(token)
+        if ip and not ip.startswith("127."):
+            return ip
     return ""
 
 
