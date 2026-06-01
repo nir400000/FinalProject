@@ -7,7 +7,7 @@ scans nearby Wi-Fi networks on the Pi, sends credentials, and receives the new I
 
 ```bash
 sudo apt update
-sudo apt install -y python3-bluezero python3-dbus python3-gi network-manager bluez
+sudo apt install -y python3-dbus python3-gi network-manager bluez
 
 sudo systemctl enable --now bluetooth
 
