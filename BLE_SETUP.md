@@ -36,5 +36,6 @@ python3 -c "from ble_wifi_provision import run_ble_provisioning_server; run_ble_
 
 - **No adapter**: `hciconfig` or `bluetoothctl show` — enable Bluetooth in `raspi-config`.
 - **Permission errors**: run with a user in the `bluetooth` group, or test with `sudo` once.
+- **`characteristic_value` / notify errors**: update `ble_wifi_provision.py` to the latest version (uses `set_value()`).
 - **Scan empty**: move the Pi closer to routers; run `nmcli dev wifi list` manually.
 - **Connect fails**: check password; open networks leave password empty in the app.

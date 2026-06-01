@@ -41,18 +41,33 @@ class ProvisionServer:
         self.status = json.dumps({"state": "idle", "message": "Ready"})
         self.device_ip = ""
         self.ble = None
+        self._chars: dict[int, object] = {}
 
     def _bytes(self, text: str) -> list[int]:
         return list(text.encode("utf-8"))
 
     def _notify(self, chr_id: int, payload: str) -> None:
-        if self.ble is None:
+        """Push a value update (and BLE notification) to connected phones."""
+        characteristic = self._chars.get(chr_id)
+        if characteristic is None:
             return
+
         data = self._bytes(payload)
-        self.ble.characteristic_value[SVC_ID][chr_id] = data
-        srv_uuid = self.ble.services[SVC_ID].uuid
-        chr_uuid = self.ble.characteristics[SVC_ID][chr_id].uuid
-        self.ble.dongle.char_value_changed(srv_uuid, chr_uuid, payload.encode("utf-8"))
+
+        def _send() -> bool:
+            try:
+                characteristic.set_value(data)
+            except Exception:
+                logger.exception("Failed to send BLE notification for chr_id=%s", chr_id)
+            return False
+
+        try:
+            from gi.repository import GLib
+
+            GLib.idle_add(_send)
+        except Exception:
+            # Fallback if GLib is unavailable (e.g. unit tests)
+            _send()
 
     def _set_status(self, state: str, message: str) -> None:
         with self.lock:
@@ -122,6 +137,10 @@ class ProvisionServer:
         else:
             self._set_status("error", "Connected but IP address was not found")
 
+    def _register_characteristic(self, chr_id: int, **kwargs) -> None:
+        self.ble.add_characteristic(srv_id=SVC_ID, chr_id=chr_id, **kwargs)
+        self._chars[chr_id] = self.ble.characteristics[-1]
+
     def start(self) -> None:
         from bluezero import adapter as bluez_adapter
         from bluezero import peripheral
@@ -134,45 +153,40 @@ class ProvisionServer:
         self.ble = peripheral.Peripheral(adapter_address, local_name=DEVICE_LOCAL_NAME)
         self.ble.add_service(srv_id=SVC_ID, uuid=SERVICE_UUID, primary=True)
 
-        self.ble.add_characteristic(
-            srv_id=SVC_ID,
-            chr_id=CHR_CMD,
+        self._register_characteristic(
+            CHR_CMD,
             uuid=CHAR_CMD_UUID,
             value=[],
             notifying=False,
             flags=["write", "write-without-response"],
             write_callback=self.write_cmd,
         )
-        self.ble.add_characteristic(
-            srv_id=SVC_ID,
-            chr_id=CHR_WIFI_LIST,
+        self._register_characteristic(
+            CHR_WIFI_LIST,
             uuid=CHAR_WIFI_LIST_UUID,
             value=self.read_wifi_list(),
             notifying=True,
             flags=["read", "notify"],
             read_callback=self.read_wifi_list,
         )
-        self.ble.add_characteristic(
-            srv_id=SVC_ID,
-            chr_id=CHR_WIFI_CRED,
+        self._register_characteristic(
+            CHR_WIFI_CRED,
             uuid=CHAR_WIFI_CRED_UUID,
             value=[],
             notifying=False,
             flags=["write", "write-without-response"],
             write_callback=self.write_wifi_cred,
         )
-        self.ble.add_characteristic(
-            srv_id=SVC_ID,
-            chr_id=CHR_STATUS,
+        self._register_characteristic(
+            CHR_STATUS,
             uuid=CHAR_STATUS_UUID,
             value=self.read_status(),
             notifying=True,
             flags=["read", "notify"],
             read_callback=self.read_status,
         )
-        self.ble.add_characteristic(
-            srv_id=SVC_ID,
-            chr_id=CHR_DEVICE_IP,
+        self._register_characteristic(
+            CHR_DEVICE_IP,
             uuid=CHAR_DEVICE_IP_UUID,
             value=self.read_device_ip(),
             notifying=True,
