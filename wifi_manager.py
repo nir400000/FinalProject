@@ -134,16 +134,21 @@ def _key_mgmt_modes(security: str) -> List[str]:
     return modes
 
 
+def _connection_name(ssid: str) -> str:
+    return re.sub(r"[^a-zA-Z0-9._-]", "_", f"baby-monitor-{ssid}")[:32]
+
+
 def _connect_with_profile(
     ssid: str,
     password: str,
     key_mgmt: str,
     ifname: str,
 ) -> Tuple[bool, str]:
-    con_name = re.sub(r"[^a-zA-Z0-9._-]", "_", f"baby-monitor-{ssid}")[:32]
-
+    """Create a NetworkManager profile with explicit WPA settings, then activate it."""
+    con_name = _connection_name(ssid)
     _delete_stale_profiles(ssid)
 
+    # Approach A: one-shot add (works on most recent NetworkManager)
     add_cmd = [
         "nmcli",
         "connection",
@@ -156,22 +161,81 @@ def _connect_with_profile(
         ifname,
         "ssid",
         ssid,
-        "wifi-sec.key-mgmt",
+        "802-11-wireless-security.key-mgmt",
         key_mgmt,
-        "wifi-sec.psk",
+        "802-11-wireless-security.psk",
         password,
     ]
     add_result = _run(add_cmd, timeout=30)
     if add_result.returncode != 0:
-        return False, (add_result.stderr or add_result.stdout or "").strip()
+        # Approach B: create profile, then set security with modify
+        _run(["nmcli", "connection", "delete", con_name], timeout=15)
+        base_result = _run(
+            [
+                "nmcli",
+                "connection",
+                "add",
+                "type",
+                "wifi",
+                "con-name",
+                con_name,
+                "ifname",
+                ifname,
+                "ssid",
+                ssid,
+            ],
+            timeout=30,
+        )
+        if base_result.returncode != 0:
+            return False, (base_result.stderr or base_result.stdout or add_result.stderr or "").strip()
+
+        modify_result = _run(
+            [
+                "nmcli",
+                "connection",
+                "modify",
+                con_name,
+                "802-11-wireless-security.key-mgmt",
+                key_mgmt,
+                "802-11-wireless-security.psk",
+                password,
+            ],
+            timeout=30,
+        )
+        if modify_result.returncode != 0:
+            _run(["nmcli", "connection", "delete", con_name], timeout=15)
+            return False, (modify_result.stderr or modify_result.stdout or "").strip()
 
     up_result = _run(["nmcli", "-w", "90", "connection", "up", con_name], timeout=120)
-    output = (up_result.stderr or up_result.stdout or add_result.stdout or "").strip()
+    output = (up_result.stderr or up_result.stdout or "").strip()
     if up_result.returncode == 0:
         return True, output
 
     _run(["nmcli", "connection", "delete", con_name], timeout=15)
     return False, output
+
+
+def _connect_with_password_only(ssid: str, password: str, ifname: str) -> Tuple[bool, str]:
+    """
+    Let NetworkManager infer security from the last scan.
+    Valid args for `dev wifi connect`: SSID, password, ifname only.
+    """
+    cmd = [
+        "nmcli",
+        "-w",
+        "90",
+        "dev",
+        "wifi",
+        "connect",
+        ssid,
+        "password",
+        password,
+        "ifname",
+        ifname,
+    ]
+    result = _run(cmd, timeout=120)
+    output = (result.stderr or result.stdout or "").strip()
+    return result.returncode == 0, output
 
 
 def connect_network(
@@ -201,31 +265,12 @@ def connect_network(
             return True, msg
         last_error = msg
 
-    # Last resort: inline connect with explicit key-mgmt (older nmcli style)
-    for key_mgmt in modes or ["wpa-psk", "sae"]:
-        cmd = [
-            "nmcli",
-            "-w",
-            "90",
-            "dev",
-            "wifi",
-            "connect",
-            ssid,
-            "ifname",
-            ifname,
-            "password",
-            pwd,
-            "wifi-sec.key-mgmt",
-            key_mgmt,
-        ]
-        result = _run(cmd, timeout=120)
-        output = (result.stderr or result.stdout or "").strip()
-        if result.returncode == 0:
-            return True, output
-        last_error = output
-        _delete_stale_profiles(ssid)
+    # Fallback: infer security from scan (no key-mgmt args on dev wifi connect)
+    ok, msg = _connect_with_password_only(ssid, pwd, ifname)
+    if ok:
+        return True, msg
 
-    return False, last_error or "Connection failed"
+    return False, last_error or msg or "Connection failed"
 
 
 def _extract_ipv4(text: str) -> str:

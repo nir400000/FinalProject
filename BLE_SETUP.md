@@ -56,5 +56,6 @@ python3 -c "from ble_wifi_provision import run_ble_provisioning_server; run_ble_
 - **`characteristic_value` / notify errors**: update `ble_wifi_provision.py` to the latest version (uses `set_value()`).
 - **Scan empty**: move the Pi closer to routers; run `nmcli dev wifi list` manually.
 - **Connect fails**: check password; open networks leave password empty in the app.
-- **`key-mgmt: property is missing`**: update `wifi_manager.py` (sets `wifi-sec.key-mgmt` explicitly) and remove old profiles with `nmcli connection show` / `nmcli connection delete <name>`.
+- **`key-mgmt: property is missing`**: update `wifi_manager.py` (sets `802-11-wireless-security.key-mgmt` on a connection profile).
+- **`invalid extra argument, wifi-sec.key-mgmt`**: update `wifi_manager.py` — do not pass security flags to `nmcli dev wifi connect`.
 - **Pairing asks for matching codes on Pi and phone**: copy `ble_pairing_agent.py` and updated `ble_wifi_provision.py`; restart the server. Run as a user in the `bluetooth` group or test with `sudo` once.
