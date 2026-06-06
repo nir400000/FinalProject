@@ -1,0 +1,11 @@
+# Allow the Pi user to manage Wi-Fi without a password prompt (for BLE provisioning).
+# Install: sudo cp 50-babymonitor-wifi.rules /etc/polkit-1/rules.d/
+#          sudo systemctl restart polkit
+
+polkit.addRule(function(action, subject) {
+    if (action.id.indexOf("org.freedesktop.NetworkManager.") === 0) {
+        if (subject.isInGroup("netdev") || subject.isInGroup("sudo")) {
+            return polkit.Result.YES;
+        }
+    }
+});

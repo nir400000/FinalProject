@@ -5,17 +5,51 @@ from __future__ import annotations
 import json
 import re
 import subprocess
+import time
 from typing import List, Optional, Tuple
 
 
-def _run(cmd: List[str], timeout: int = 120) -> subprocess.CompletedProcess:
-    return subprocess.run(
+def _needs_elevated_privileges(output: str) -> bool:
+    text = output.lower()
+    return any(
+        phrase in text
+        for phrase in (
+            "insufficient privilege",
+            "insufficient privileges",
+            "not authorized",
+            "authorization failed",
+            "permission denied",
+        )
+    )
+
+
+def _run(cmd: List[str], timeout: int = 120, allow_sudo: bool = True) -> subprocess.CompletedProcess:
+    """Run nmcli; retry with passwordless sudo when NetworkManager denies access."""
+    result = subprocess.run(
         cmd,
         capture_output=True,
         text=True,
         timeout=timeout,
         check=False,
     )
+    if (
+        allow_sudo
+        and result.returncode != 0
+        and cmd[0] != "sudo"
+        and _needs_elevated_privileges(result.stderr + result.stdout)
+    ):
+        sudo_result = subprocess.run(
+            ["sudo", "-n"] + cmd,
+            capture_output=True,
+            text=True,
+            timeout=timeout,
+            check=False,
+        )
+        if sudo_result.returncode == 0 or not _needs_elevated_privileges(
+            sudo_result.stderr + sudo_result.stdout
+        ):
+            return sudo_result
+    return result
 
 
 def get_wifi_interface() -> str:
@@ -29,9 +63,7 @@ def get_wifi_interface() -> str:
 
 
 def _parse_terse_fields(line: str, field_count: int) -> Optional[List[str]]:
-    """
-    Parse nmcli -t lines. Colons inside values are escaped as \\:
-    """
+    """Parse nmcli -t lines. Colons inside values are escaped as \\:."""
     fields: List[str] = []
     current: List[str] = []
     i = 0
@@ -55,22 +87,34 @@ def _parse_terse_fields(line: str, field_count: int) -> Optional[List[str]]:
     return fields if len(fields) == field_count else None
 
 
-def scan_networks(max_networks: int = 25) -> List[dict]:
+def scan_networks(max_networks: int = 50) -> List[dict]:
     """Return visible Wi-Fi networks sorted by signal strength."""
+    ifname = get_wifi_interface()
+
     try:
-        _run(["nmcli", "dev", "wifi", "rescan"], timeout=30)
+        _run(["nmcli", "dev", "wifi", "rescan", "ifname", ifname], timeout=45)
+        time.sleep(3)
     except (FileNotFoundError, subprocess.TimeoutExpired):
         pass
 
     result = _run(
-        ["nmcli", "-t", "-f", "SSID,SIGNAL,SECURITY", "dev", "wifi", "list"],
+        [
+            "nmcli",
+            "-t",
+            "-f",
+            "SSID,SIGNAL,SECURITY",
+            "dev",
+            "wifi",
+            "list",
+            "ifname",
+            ifname,
+        ],
         timeout=60,
     )
     if result.returncode != 0:
         raise RuntimeError(result.stderr.strip() or "Wi-Fi scan failed")
 
-    networks: List[dict] = []
-    seen = set()
+    by_ssid: dict[str, dict] = {}
     for line in result.stdout.splitlines():
         if not line:
             continue
@@ -78,23 +122,24 @@ def scan_networks(max_networks: int = 25) -> List[dict]:
         if not parsed:
             continue
         ssid, signal_text, security = parsed[0].strip(), parsed[1].strip(), parsed[2].strip()
-        if not ssid or ssid in seen:
+        if not ssid:
             continue
-        seen.add(ssid)
         try:
             rssi = int(signal_text)
         except ValueError:
             rssi = 0
         secure = bool(security and security != "--")
-        networks.append(
-            {
-                "ssid": ssid,
-                "rssi": rssi,
-                "secure": secure,
-                "security": security if security != "--" else "",
-            }
-        )
+        entry = {
+            "ssid": ssid,
+            "rssi": rssi,
+            "secure": secure,
+            "security": security if security != "--" else "",
+        }
+        existing = by_ssid.get(ssid)
+        if existing is None or rssi > existing["rssi"]:
+            by_ssid[ssid] = entry
 
+    networks = list(by_ssid.values())
     networks.sort(key=lambda item: item["rssi"], reverse=True)
     return networks[:max_networks]
 
@@ -117,18 +162,14 @@ def _key_mgmt_modes(security: str) -> List[str]:
         return []
 
     modes: List[str] = []
-    # WPA3-personal only
     if "WPA3" in sec and "WPA2" not in sec and "WPA1" not in sec:
         modes.append("sae")
-    # WPA2 / mixed / generic secured
     if "WPA2" in sec or "WPA1" in sec or "WPA" in sec:
         modes.append("wpa-psk")
     if "WPA3" in sec and "wpa-psk" not in modes:
         modes.append("wpa-psk")
     if "SAE" in sec and "sae" not in modes:
         modes.append("sae")
-
-    # Default for unknown secured networks (most home routers)
     if not modes:
         modes = ["wpa-psk", "sae"]
     return modes
@@ -148,7 +189,6 @@ def _connect_with_profile(
     con_name = _connection_name(ssid)
     _delete_stale_profiles(ssid)
 
-    # Approach A: one-shot add (works on most recent NetworkManager)
     add_cmd = [
         "nmcli",
         "connection",
@@ -168,7 +208,6 @@ def _connect_with_profile(
     ]
     add_result = _run(add_cmd, timeout=30)
     if add_result.returncode != 0:
-        # Approach B: create profile, then set security with modify
         _run(["nmcli", "connection", "delete", con_name], timeout=15)
         base_result = _run(
             [
@@ -249,28 +288,32 @@ def connect_network(
 
     _delete_stale_profiles(ssid)
 
-    # Open network
+    try:
+        _run(["nmcli", "dev", "wifi", "rescan", "ifname", ifname], timeout=45)
+        time.sleep(2)
+    except (FileNotFoundError, subprocess.TimeoutExpired):
+        pass
+
     if not pwd:
         cmd = ["nmcli", "-w", "90", "dev", "wifi", "connect", ssid, "ifname", ifname]
         result = _run(cmd, timeout=120)
         output = (result.stderr or result.stdout or "").strip()
         return result.returncode == 0, output
 
-    last_error = ""
-    modes = _key_mgmt_modes(security)
+    # Try simple connect first (no root profile needed on many Pi setups)
+    ok, msg = _connect_with_password_only(ssid, pwd, ifname)
+    if ok:
+        return True, msg
 
+    last_error = msg
+    modes = _key_mgmt_modes(security)
     for key_mgmt in modes:
         ok, msg = _connect_with_profile(ssid, pwd, key_mgmt, ifname)
         if ok:
             return True, msg
         last_error = msg
 
-    # Fallback: infer security from scan (no key-mgmt args on dev wifi connect)
-    ok, msg = _connect_with_password_only(ssid, pwd, ifname)
-    if ok:
-        return True, msg
-
-    return False, last_error or msg or "Connection failed"
+    return False, last_error or "Connection failed"
 
 
 def _extract_ipv4(text: str) -> str:
