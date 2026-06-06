@@ -38,8 +38,8 @@ MOVEMENT_HIGH = 18.0
 
 # Seconds candidate state must hold before switching
 CONFIRM_SEC = {
-    STATE_SLEEPING: 90,
-    STATE_AWAKE: 45,
+    STATE_SLEEPING: 10,
+    STATE_AWAKE: 5,
     STATE_OUT: 15,
 }
 

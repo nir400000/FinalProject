@@ -5,6 +5,7 @@ import threading
 import time
 from picamera2 import Picamera2
 from ultralytics import YOLO
+from sleep_tracker import get_sleep_tracker, STATE_AWAKE, STATE_OUT, STATE_SLEEPING
 
 # --- HARDWARE SETUP ---
 camera = Picamera2()
@@ -93,6 +94,10 @@ def main():
     frame_for_inference = {'img': None, 'w': 640, 'h': 480}
     last_kps = []
     last_label = 'unknown'
+    # holders so worker can update without rebinding outer vars
+    last_label_holder = [last_label]
+    last_sleep_state_holder = [STATE_OUT]
+    last_activity_holder = [0.0]
     stop_event = threading.Event()
     state_lock = threading.Lock()
 
@@ -133,13 +138,22 @@ def main():
                     scaled_kps.append((x * sx, y * sy, c))
 
             lbl = classify_pose(scaled_kps)
+            # Update sleep tracker
+            now_ts = time.time()
+            try:
+                sleep_state = get_sleep_tracker().update(scaled_kps, lbl, now_ts)
+                activity_index = get_sleep_tracker().get_status().get('activity_index', 0.0)
+            except Exception:
+                sleep_state = STATE_OUT
+                activity_index = 0.0
+
             with state_lock:
                 last_kps.clear()
                 last_kps.extend(scaled_kps)
                 last_label_holder[0] = lbl
+                last_sleep_state_holder[0] = sleep_state
+                last_activity_holder[0] = float(activity_index)
 
-    # holder for label so worker can update without reassigning outer var
-    last_label_holder = [label]
     worker = threading.Thread(target=inference_worker, daemon=True)
     worker.start()
 
@@ -192,10 +206,15 @@ def main():
         
         cv2.putText(frame_bgr, f'FPS: {fps:.1f}', (10, 80),
                     cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 0, 0), 2)
-        # Draw last detected keypoints/skeleton
+        # Draw last detected keypoints/skeleton and overlay tracker info
         with state_lock:
             draw_keypoints(frame_bgr, last_kps)
             label = last_label_holder[0]
+            sleep_state = last_sleep_state_holder[0]
+            activity_index = last_activity_holder[0]
+
+        cv2.putText(frame_bgr, f'Sleep: {sleep_state} ({activity_index:.2f})', (10, 120),
+                    cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 200, 255), 2)
 
         cv2.imshow('Pi Camera Feed', frame_bgr)
         if cv2.waitKey(1) & 0xFF == 27:
