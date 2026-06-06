@@ -1,4 +1,5 @@
 from flask import Flask, Response, jsonify
+from sleep_tracker import get_sleep_tracker, STATE_AWAKE, STATE_OUT, STATE_SLEEPING
 import cv2
 from picamera2 import Picamera2
 import numpy as np
@@ -26,6 +27,7 @@ _inference_state = {
     'frame_for_inference': None,
     'last_kps': [],
     'last_label': 'unknown',
+    'sleep_state': STATE_OUT,
     'stop_event': threading.Event(),
     'state_lock': threading.Lock(),
     'worker': None
@@ -70,9 +72,11 @@ def _inference_worker():
                 scaled_kps.append((x * sx, y * sy, c))
         
         lbl = classify_pose(scaled_kps)
+        sleep_state = get_sleep_tracker().update(scaled_kps, lbl, now)
         with _inference_state['state_lock']:
             _inference_state['last_kps'] = scaled_kps
-            _inference_state['last_label'] = lbl 
+            _inference_state['last_label'] = lbl
+            _inference_state['sleep_state'] = sleep_state
 
 def get_yolo_keypoints(results):
     """
@@ -195,10 +199,16 @@ def generate_frames():
         # Get latest inference results
         with _inference_state['state_lock']:
             label = _inference_state['last_label']
+            sleep_state = _inference_state.get('sleep_state', STATE_OUT)
         
         # Draw text
-        cv2.putText(frame_bgr, f"Status: {label}", (10, 50), 
-                    cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
+        cv2.putText(frame_bgr, f"Pose: {label}", (10, 40), 
+                    cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 255, 0), 2)
+        sleep_color = (0, 200, 255) if sleep_state == STATE_SLEEPING else (
+            (0, 165, 255) if sleep_state == STATE_AWAKE else (128, 128, 128)
+        )
+        cv2.putText(frame_bgr, f"Sleep: {sleep_state}", (10, 75), 
+                    cv2.FONT_HERSHEY_SIMPLEX, 0.7, sleep_color, 2)
         cv2.putText(frame_bgr, f"{fps:.1f}", (10, 470), 
                     cv2.FONT_HERSHEY_SIMPLEX, 0.4, (255, 0, 0), 1)
 
@@ -230,7 +240,18 @@ def health():
 def pose_json():
     with _inference_state['state_lock']:
         label = _inference_state['last_label']
-    return jsonify({'pose': label})
+        sleep_state = _inference_state.get('sleep_state', STATE_OUT)
+    return jsonify({'pose': label, 'sleep_state': sleep_state})
+
+
+@app.route('/sleep/status')
+def sleep_status():
+    return jsonify(get_sleep_tracker().get_status())
+
+
+@app.route('/sleep/analytics')
+def sleep_analytics():
+    return jsonify(get_sleep_tracker().get_full_report())
 
 @app.route('/')
 def home():
