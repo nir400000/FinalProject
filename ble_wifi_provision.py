@@ -22,6 +22,7 @@ from provisioning_constants import (
     DEVICE_LOCAL_NAME,
     SERVICE_UUID,
 )
+from ble_chunked_transfer import split_payload
 from ble_pairing_agent import start_headless_pairing_agent
 from wifi_manager import connect_network, get_primary_ip, networks_to_json, scan_networks
 
@@ -47,13 +48,10 @@ class ProvisionServer:
     def _bytes(self, text: str) -> list[int]:
         return list(text.encode("utf-8"))
 
-    def _notify(self, chr_id: int, payload: str) -> None:
-        """Push a value update (and BLE notification) to connected phones."""
+    def _notify_bytes(self, chr_id: int, data: list[int]) -> None:
         characteristic = self._chars.get(chr_id)
         if characteristic is None:
             return
-
-        data = self._bytes(payload)
 
         def _send() -> bool:
             try:
@@ -67,8 +65,19 @@ class ProvisionServer:
 
             GLib.idle_add(_send)
         except Exception:
-            # Fallback if GLib is unavailable (e.g. unit tests)
             _send()
+
+    def _notify(self, chr_id: int, payload: str) -> None:
+        """Push a value update (and BLE notification) to connected phones."""
+        self._notify_bytes(chr_id, self._bytes(payload))
+
+    def _notify_chunked(self, chr_id: int, payload: str) -> None:
+        """Send large payloads as multiple framed notifications."""
+        frames = split_payload(payload)
+        for index, frame in enumerate(frames):
+            self._notify_bytes(chr_id, list(frame))
+            if index < len(frames) - 1:
+                time.sleep(0.08)
 
     def _set_status(self, state: str, message: str) -> None:
         with self.lock:
@@ -103,7 +112,8 @@ class ProvisionServer:
             payload = networks_to_json(networks)
             with self.lock:
                 self.wifi_list = payload
-            self._notify(CHR_WIFI_LIST, payload)
+            self._notify_chunked(CHR_WIFI_LIST, payload)
+            time.sleep(0.2)
             self._set_status("idle", f"Found {len(networks)} network(s)")
         except Exception as exc:
             logger.exception("Wi-Fi scan failed")

@@ -84,3 +84,4 @@ python3 -c "from ble_wifi_provision import run_ble_provisioning_server; run_ble_
 - **`key-mgmt: property is missing`**: update `wifi_manager.py` (sets `802-11-wireless-security.key-mgmt` on a connection profile).
 - **`invalid extra argument, wifi-sec.key-mgmt`**: update `wifi_manager.py` — do not pass security flags to `nmcli dev wifi connect`.
 - **Pairing asks for matching codes on Pi and phone**: copy `ble_pairing_agent.py` and updated `ble_wifi_provision.py`; restart the server. Run as a user in the `bluetooth` group or test with `sudo` once.
+- **Wi-Fi list JSON parse error / 512 chars**: update `ble_wifi_provision.py` and `ble_chunked_transfer.py` on the Pi, rebuild the app (chunked BLE transfer).
