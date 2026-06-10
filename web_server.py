@@ -1,4 +1,5 @@
 from flask import Flask, Response, jsonify
+from frame_buffer import update_frame
 from sleep_tracker import get_sleep_tracker, STATE_AWAKE, STATE_OUT, STATE_SLEEPING
 import cv2
 from picamera2 import Picamera2
@@ -178,6 +179,7 @@ def generate_frames():
         # Capture frame (Format is XRGB, 4 channels)
         frame_xrgb = camera.capture_array()
         frame_bgr = np.ascontiguousarray(frame_xrgb[:, :, :3])
+        update_frame(frame_bgr)
         
         # Post frame for inference worker
         if frame_count % one_in_Xframes == 0:
@@ -253,6 +255,13 @@ def sleep_status():
 def sleep_analytics():
     return jsonify(get_sleep_tracker().get_full_report())
 
+@app.route('/remote/info')
+def remote_info():
+    from device_registry import get_remote_info_json
+
+    return get_remote_info_json(), 200, {"Content-Type": "application/json"}
+
+
 @app.route('/')
 def home():
     return '<h1>Baby Monitor</h1><img src="/video_feed" style="width:640px; height:480px;" />'
@@ -265,6 +274,13 @@ if __name__ == '__main__':
             print('BLE Wi-Fi provisioning started (advertising as BabyMonitor)')
         except Exception as ble_exc:
             print(f'BLE Wi-Fi provisioning not available: {ble_exc}')
+
+        try:
+            from remote_access import start_remote_access_thread
+            start_remote_access_thread()
+            print('Remote WebRTC access started (outbound signaling)')
+        except Exception as remote_exc:
+            print(f'Remote WebRTC not available: {remote_exc}')
 
         # Threaded=True is important for Flask with Video Streaming
         app.run(host='0.0.0.0', port=5001, threaded=True)

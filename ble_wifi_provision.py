@@ -15,6 +15,7 @@ import time
 from provisioning_constants import (
     CHAR_CMD_UUID,
     CHAR_DEVICE_IP_UUID,
+    CHAR_REMOTE_INFO_UUID,
     CHAR_STATUS_UUID,
     CHAR_WIFI_CRED_UUID,
     CHAR_WIFI_LIST_UUID,
@@ -24,6 +25,7 @@ from provisioning_constants import (
 )
 from ble_chunked_transfer import split_payload
 from ble_pairing_agent import start_headless_pairing_agent
+from device_registry import get_remote_info_json
 from wifi_manager import connect_network, get_primary_ip, networks_to_json, scan_networks
 
 logger = logging.getLogger(__name__)
@@ -34,6 +36,7 @@ CHR_WIFI_LIST = 2
 CHR_WIFI_CRED = 3
 CHR_STATUS = 4
 CHR_DEVICE_IP = 5
+CHR_REMOTE_INFO = 6
 
 
 class ProvisionServer:
@@ -96,6 +99,9 @@ class ProvisionServer:
     def read_device_ip(self) -> list[int]:
         with self.lock:
             return self._bytes(self.device_ip)
+
+    def read_remote_info(self) -> list[int]:
+        return self._bytes(get_remote_info_json())
 
     def write_cmd(self, value, options) -> None:
         cmd = bytes(value).decode("utf-8", errors="ignore").strip().upper()
@@ -212,6 +218,14 @@ class ProvisionServer:
             notifying=True,
             flags=["read", "notify"],
             read_callback=self.read_device_ip,
+        )
+        self._register_characteristic(
+            CHR_REMOTE_INFO,
+            uuid=CHAR_REMOTE_INFO_UUID,
+            value=self.read_remote_info(),
+            notifying=True,
+            flags=["read", "notify"],
+            read_callback=self.read_remote_info,
         )
 
         logger.info(
