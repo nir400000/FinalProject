@@ -1,4 +1,4 @@
 __pycache__/
 *.pyc
-
+*.pt
 sleep_data.db
