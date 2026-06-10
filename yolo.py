@@ -1,7 +1,7 @@
 from ultralytics import YOLO
 
 # Load a model (it downloads automatically)
-model = YOLO('yolov8n-pose.pt') 
+model = YOLO('yolo11n-pose.pt') 
 
-# Run inference on camera source
-results = model(source=0, show=True)
+# Export to ONNX format with input size 320
+model.export(format='ncnn', imgsz=320)
