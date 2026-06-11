@@ -110,6 +110,8 @@ async def handler(ws: WebSocketServerProtocol) -> None:
                 continue
 
             await send_json(ws, {"type": "error", "message": f"Unknown type: {msg_type}"})
+    except ConnectionClosed:
+        logger.info("Client disconnected (%s, device=%s)", role or "unknown", device_id or "?")
     finally:
         if device_id and role == "monitor" and monitors.get(device_id) is ws:
             monitors.pop(device_id, None)

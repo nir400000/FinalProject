@@ -11,6 +11,9 @@ from typing import Dict
 
 CONFIG_PATH = Path(__file__).resolve().parent / "device_config.json"
 DEFAULT_SIGNALING_URL = os.environ.get("BABYMONITOR_SIGNALING_URL", "").strip()
+DEFAULT_TURN_URL = os.environ.get("BABYMONITOR_TURN_URL", "").strip()
+DEFAULT_TURN_USERNAME = os.environ.get("BABYMONITOR_TURN_USERNAME", "babymonitor").strip()
+DEFAULT_TURN_PASSWORD = os.environ.get("BABYMONITOR_TURN_PASSWORD", "").strip()
 
 
 def _load() -> Dict:
@@ -38,6 +41,15 @@ def get_device_config() -> Dict:
     if "signaling_url" not in data:
         data["signaling_url"] = DEFAULT_SIGNALING_URL
         changed = True
+    if not data.get("turn_url") and DEFAULT_TURN_URL:
+        data["turn_url"] = DEFAULT_TURN_URL
+        changed = True
+    if not data.get("turn_username"):
+        data["turn_username"] = DEFAULT_TURN_USERNAME or "babymonitor"
+        changed = True
+    if not data.get("turn_password"):
+        data["turn_password"] = DEFAULT_TURN_PASSWORD or secrets.token_urlsafe(16)
+        changed = True
     if changed:
         _save(data)
     return data
@@ -50,6 +62,9 @@ def get_remote_info_json() -> str:
             "device_id": cfg["device_id"],
             "access_token": cfg["access_token"],
             "signaling_url": cfg.get("signaling_url", ""),
+            "turn_url": cfg.get("turn_url", ""),
+            "turn_username": cfg.get("turn_username", ""),
+            "turn_password": cfg.get("turn_password", ""),
         }
     )
 

@@ -30,9 +30,26 @@ from frame_buffer import get_frame_copy
 
 logger = logging.getLogger(__name__)
 
-RTC_CONFIGURATION = RTCConfiguration(
-    iceServers=[RTCIceServer(urls=["stun:stun.l.google.com:19302"])]
-)
+
+def build_rtc_configuration() -> RTCConfiguration:
+    """Build ICE config; TURN is required for phone on cellular / different Wi-Fi."""
+    ice_servers = [RTCIceServer(urls=["stun:stun.l.google.com:19302"])]
+    cfg = get_device_config()
+    turn_url = str(cfg.get("turn_url", "") or "").strip()
+    if turn_url:
+        ice_servers.append(
+            RTCIceServer(
+                urls=[turn_url],
+                username=str(cfg.get("turn_username", "") or ""),
+                credential=str(cfg.get("turn_password", "") or ""),
+            )
+        )
+        logger.info("Remote WebRTC using TURN relay at %s", turn_url)
+    else:
+        logger.warning(
+            "No TURN server configured; internet viewing may fail off the home Wi-Fi"
+        )
+    return RTCConfiguration(iceServers=ice_servers)
 
 
 class CameraStreamTrack(VideoStreamTrack):
@@ -145,7 +162,7 @@ class RemoteAccessService:
     async def _ensure_peer(self, ws) -> RTCPeerConnection:
         if self._pc:
             return self._pc
-        pc = RTCPeerConnection(configuration=RTC_CONFIGURATION)
+        pc = RTCPeerConnection(configuration=build_rtc_configuration())
         pc.addTrack(CameraStreamTrack())
 
         @pc.on("icecandidate")

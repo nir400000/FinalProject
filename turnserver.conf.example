@@ -1,0 +1,17 @@
+# Example coturn config for AWS (copy to /etc/turnserver.conf)
+# Replace PUBLIC_IP and the user/password with values from device_config.json on the Pi.
+
+listening-port=3478
+fingerprint
+lt-cred-mech
+realm=babymonitor
+external-ip=PUBLIC_IP
+user=babymonitor:YOUR_TURN_PASSWORD
+
+# Relay ports (open this UDP range in AWS security group)
+min-port=49160
+max-port=49200
+
+no-cli
+no-tls
+no-dtls
