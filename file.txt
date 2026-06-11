@@ -1,0 +1,15 @@
+Failed to handle WebRTC signal (offer)
+Traceback (most recent call last):
+  File "/home/nir/Desktop/server/remote_access.py", line 169, in _handle_signal
+    pc = await self._ensure_peer(ws)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/nir/Desktop/server/remote_access.py", line 141, in _ensure_peer
+    pc.addTrack(CameraStreamTrack())
+    ~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^
+  File "/home/nir/Desktop/server/venv/lib/python3.13/site-packages/aiortc/rtcpeerconnection.py", line 478, in addTrack
+    transceiver = self.__createTransceiver(
+        direction="sendrecv", kind=track.kind, sender_track=track
+    )
+  File "/home/nir/Desktop/server/venv/lib/python3.13/site-packages/aiortc/rtcpeerconnection.py", line 1163, in __createTransceiver
+    if self.__configuration.bundlePolicy == RTCBundlePolicy.MAX_BUNDLE:
+       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
