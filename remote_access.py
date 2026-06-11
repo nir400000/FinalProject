@@ -81,12 +81,18 @@ class RemoteAccessService:
             self._loop.close()
 
     async def _shutdown(self) -> None:
-        if self._pc:
-            await self._pc.close()
-            self._pc = None
+        await self._reset_peer()
         if self._ws:
             await self._ws.close()
             self._ws = None
+
+    async def _reset_peer(self) -> None:
+        if self._pc:
+            try:
+                await self._pc.close()
+            except Exception:
+                logger.exception("Failed to close peer connection")
+            self._pc = None
 
     async def _main(self) -> None:
         import websockets
@@ -120,7 +126,11 @@ class RemoteAccessService:
         async for raw in ws:
             if self._stop.is_set():
                 break
-            message = json.loads(raw)
+            try:
+                message = json.loads(raw)
+            except json.JSONDecodeError:
+                logger.warning("Ignoring invalid signaling JSON")
+                continue
             if message.get("type") == "signal":
                 await self._handle_signal(ws, message.get("payload", {}))
 
@@ -153,33 +163,38 @@ class RemoteAccessService:
 
     async def _handle_signal(self, ws, payload: dict) -> None:
         kind = payload.get("kind")
-        if kind == "offer":
-            pc = await self._ensure_peer(ws)
-            offer = RTCSessionDescription(sdp=payload["sdp"], type=payload["type"])
-            await pc.setRemoteDescription(offer)
-            answer = await pc.createAnswer()
-            await pc.setLocalDescription(answer)
-            await ws.send(
-                json.dumps(
-                    {
-                        "type": "signal",
-                        "payload": {
-                            "kind": "answer",
-                            "type": pc.localDescription.type,
-                            "sdp": pc.localDescription.sdp,
-                        },
-                    }
+        try:
+            if kind == "offer":
+                await self._reset_peer()
+                pc = await self._ensure_peer(ws)
+                offer = RTCSessionDescription(sdp=payload["sdp"], type=payload["type"])
+                await pc.setRemoteDescription(offer)
+                answer = await pc.createAnswer()
+                await pc.setLocalDescription(answer)
+                await ws.send(
+                    json.dumps(
+                        {
+                            "type": "signal",
+                            "payload": {
+                                "kind": "answer",
+                                "type": pc.localDescription.type,
+                                "sdp": pc.localDescription.sdp,
+                            },
+                        }
+                    )
                 )
-            )
-            logger.info("Sent WebRTC answer to viewer")
-        elif kind == "ice" and self._pc:
-            candidate_str = payload.get("candidate")
-            if not candidate_str:
-                return
-            ice = candidate_from_sdp(candidate_str)
-            ice.sdpMid = payload.get("sdpMid")
-            ice.sdpMLineIndex = payload.get("sdpMLineIndex")
-            await self._pc.addIceCandidate(ice)
+                logger.info("Sent WebRTC answer to viewer")
+            elif kind == "ice" and self._pc:
+                candidate_str = payload.get("candidate")
+                if not candidate_str:
+                    return
+                ice = candidate_from_sdp(candidate_str)
+                ice.sdpMid = payload.get("sdpMid")
+                ice.sdpMLineIndex = payload.get("sdpMLineIndex")
+                await self._pc.addIceCandidate(ice)
+        except Exception:
+            logger.exception("Failed to handle WebRTC signal (%s)", kind)
+            await self._reset_peer()
 
 
 _service = RemoteAccessService()

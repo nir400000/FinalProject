@@ -21,6 +21,7 @@ import logging
 from typing import Dict, Optional
 
 import websockets
+from websockets.exceptions import ConnectionClosed
 from websockets.server import WebSocketServerProtocol
 
 logger = logging.getLogger(__name__)
@@ -30,14 +31,32 @@ viewers: Dict[str, WebSocketServerProtocol] = {}
 tokens: Dict[str, str] = {}
 
 
-async def send_json(ws: WebSocketServerProtocol, payload: dict) -> None:
-    await ws.send(json.dumps(payload))
+async def send_json(ws: WebSocketServerProtocol, payload: dict) -> bool:
+    try:
+        await ws.send(json.dumps(payload))
+        return True
+    except ConnectionClosed:
+        return False
+
+
+def _remove_stale(role: str, device_id: str, ws: WebSocketServerProtocol) -> None:
+    if role == "monitor" and monitors.get(device_id) is ws:
+        monitors.pop(device_id, None)
+        tokens.pop(device_id, None)
+    elif role == "viewer" and viewers.get(device_id) is ws:
+        viewers.pop(device_id, None)
 
 
 async def relay_to_peer(device_id: str, from_role: str, payload: dict) -> None:
+    to_role = "viewer" if from_role == "monitor" else "monitor"
     target = viewers.get(device_id) if from_role == "monitor" else monitors.get(device_id)
-    if target is not None:
-        await send_json(target, {"type": "signal", "payload": payload})
+    if target is None:
+        logger.info("No %s connected for device %s; dropping signal", to_role, device_id)
+        return
+    ok = await send_json(target, {"type": "signal", "payload": payload})
+    if not ok:
+        logger.info("Stale %s connection for device %s; removing", to_role, device_id)
+        _remove_stale(to_role, device_id, target)
 
 
 async def handler(ws: WebSocketServerProtocol) -> None:
