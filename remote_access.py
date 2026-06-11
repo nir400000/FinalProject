@@ -15,7 +15,13 @@ from typing import Optional
 
 import cv2
 import numpy as np
-from aiortc import RTCPeerConnection, RTCSessionDescription, VideoStreamTrack
+from aiortc import (
+    RTCConfiguration,
+    RTCIceServer,
+    RTCPeerConnection,
+    RTCSessionDescription,
+    VideoStreamTrack,
+)
 from aiortc.sdp import candidate_from_sdp
 from av import VideoFrame
 
@@ -24,7 +30,9 @@ from frame_buffer import get_frame_copy
 
 logger = logging.getLogger(__name__)
 
-STUN_SERVERS = [{"urls": ["stun:stun.l.google.com:19302"]}]
+RTC_CONFIGURATION = RTCConfiguration(
+    iceServers=[RTCIceServer(urls=["stun:stun.l.google.com:19302"])]
+)
 
 
 class CameraStreamTrack(VideoStreamTrack):
@@ -137,12 +145,12 @@ class RemoteAccessService:
     async def _ensure_peer(self, ws) -> RTCPeerConnection:
         if self._pc:
             return self._pc
-        pc = RTCPeerConnection(configuration={"iceServers": STUN_SERVERS})
+        pc = RTCPeerConnection(configuration=RTC_CONFIGURATION)
         pc.addTrack(CameraStreamTrack())
 
         @pc.on("icecandidate")
-        async def on_icecandidate(event):
-            if event.candidate is None:
+        async def on_icecandidate(candidate):
+            if candidate is None:
                 return
             await ws.send(
                 json.dumps(
@@ -150,9 +158,9 @@ class RemoteAccessService:
                         "type": "signal",
                         "payload": {
                             "kind": "ice",
-                            "candidate": event.candidate.candidate,
-                            "sdpMid": event.candidate.sdpMid,
-                            "sdpMLineIndex": event.candidate.sdpMLineIndex,
+                            "candidate": candidate.candidate,
+                            "sdpMid": candidate.sdpMid,
+                            "sdpMLineIndex": candidate.sdpMLineIndex,
                         },
                     }
                 )
