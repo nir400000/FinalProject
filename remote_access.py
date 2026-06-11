@@ -191,7 +191,28 @@ class RemoteAccessService:
         try:
             if kind == "offer":
                 await self._reset_peer()
-                pc = await self._ensure_peer(ws)
+                pc = RTCPeerConnection(configuration=build_rtc_configuration())
+                pc.addTrack(CameraStreamTrack())
+
+                @pc.on("icecandidate")
+                async def on_icecandidate(candidate):
+                    if candidate is None:
+                        return
+                    await ws.send(
+                        json.dumps(
+                            {
+                                "type": "signal",
+                                "payload": {
+                                    "kind": "ice",
+                                    "candidate": candidate.candidate,
+                                    "sdpMid": candidate.sdpMid,
+                                    "sdpMLineIndex": candidate.sdpMLineIndex,
+                                },
+                            }
+                        )
+                    )
+
+                self._pc = pc
                 offer = RTCSessionDescription(sdp=payload["sdp"], type=payload["type"])
                 await pc.setRemoteDescription(offer)
                 answer = await pc.createAnswer()
