@@ -80,7 +80,7 @@ class ProvisionServer:
         for index, frame in enumerate(frames):
             self._notify_bytes(chr_id, list(frame))
             if index < len(frames) - 1:
-                time.sleep(0.08)
+                time.sleep(0.15)
 
     def _set_status(self, state: str, message: str) -> None:
         with self.lock:
@@ -114,7 +114,7 @@ class ProvisionServer:
     def _do_scan(self) -> None:
         self._set_status("scanning", "Scanning Wi-Fi networks...")
         try:
-            networks = scan_networks()
+            networks = scan_networks(max_networks=12)
             payload = networks_to_json(networks)
             with self.lock:
                 self.wifi_list = payload
