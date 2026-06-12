@@ -38,7 +38,7 @@ def get_device_config() -> Dict:
     if not data.get("access_token"):
         data["access_token"] = secrets.token_urlsafe(32)
         changed = True
-    if "signaling_url" not in data:
+    if not str(data.get("signaling_url", "") or "").strip() and DEFAULT_SIGNALING_URL:
         data["signaling_url"] = DEFAULT_SIGNALING_URL
         changed = True
     if not data.get("turn_url") and DEFAULT_TURN_URL:
