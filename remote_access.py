@@ -131,7 +131,7 @@ class RemoteAccessService:
             await pc.close()
         except Exception:
             logger.exception("Failed to close peer connection")
-        await asyncio.sleep(0.2)
+        await asyncio.sleep(0.5)
 
     async def _safe_send(self, ws, payload: dict) -> bool:
         try:
