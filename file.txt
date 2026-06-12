@@ -1,287 +1,304 @@
-(venv) nir@BabyMonitor:~/Desktop/server $ python web_server.py
-[1:00:27.335541044] [5465]  INFO Camera camera_manager.cpp:330 libcamera v0.5.2+99-bfd68f78
-[1:00:27.344900997] [5486]  INFO RPI pisp.cpp:720 libpisp version 1.3.0
-[1:00:27.347549282] [5486]  INFO IPAProxy ipa_proxy.cpp:180 Using tuning file /usr/share/libcamera/ipa/rpi/pisp/ov5647.json
-[1:00:27.358816536] [5486]  INFO Camera camera_manager.cpp:220 Adding camera '/base/axi/pcie@1000120000/rp1/i2c@88000/ov5647@36' for pipeline handler rpi/pisp
-[1:00:27.358866629] [5486]  INFO RPI pisp.cpp:1179 Registered camera /base/axi/pcie@1000120000/rp1/i2c@88000/ov5647@36 to CFE device /dev/media1 and ISP device /dev/media0 using PiSP variant BCM2712_C0
-[1:00:27.363124993] [5465]  INFO Camera camera.cpp:1215 configuring streams: (0) 640x480-XRGB8888/sRGB (1) 640x480-GBRG_PISP_COMP1/RAW
-[1:00:27.363373883] [5486]  INFO RPI pisp.cpp:1483 Sensor: /base/axi/pcie@1000120000/rp1/i2c@88000/ov5647@36 - Selected sensor format: 640x480-SGBRG10_1X10/RAW - Selected CFE format: 640x480-PC1g/RAW
+^C(venv) nir@BabyMonitor:~/Desktop/server $ python web_server.py
+[1:30:03.614866880] [6402]  INFO Camera camera_manager.cpp:330 libcamera v0.5.2+99-bfd68f78
+[1:30:03.624039716] [6423]  INFO RPI pisp.cpp:720 libpisp version 1.3.0
+[1:30:03.626885787] [6423]  INFO IPAProxy ipa_proxy.cpp:180 Using tuning file /usr/share/libcamera/ipa/rpi/pisp/ov5647.json
+[1:30:03.636627225] [6423]  INFO Camera camera_manager.cpp:220 Adding camera '/base/axi/pcie@1000120000/rp1/i2c@88000/ov5647@36' for pipeline handler rpi/pisp
+[1:30:03.636672504] [6423]  INFO RPI pisp.cpp:1179 Registered camera /base/axi/pcie@1000120000/rp1/i2c@88000/ov5647@36 to CFE device /dev/media1 and ISP device /dev/media0 using PiSP variant BCM2712_C0
+[1:30:03.642461240] [6402]  INFO Camera camera.cpp:1215 configuring streams: (0) 640x480-XRGB8888/sRGB (1) 640x480-GBRG_PISP_COMP1/RAW
+[1:30:03.643121937] [6423]  INFO RPI pisp.cpp:1483 Sensor: /base/axi/pcie@1000120000/rp1/i2c@88000/ov5647@36 - Selected sensor format: 640x480-SGBRG10_1X10/RAW - Selected CFE format: 640x480-PC1g/RAW
 BLE Wi-Fi provisioning started (advertising as BabyMonitor)
+INFO:ble_pairing_agent:Registered headless Bluetooth pairing agent
+INFO:ble_pairing_agent:Headless pairing agent is default (Just Works / auto-confirm)
+INFO:ble_wifi_provision:Starting BLE provisioning as 'BabyMonitor' on 2C:CF:67:9A:E7:F4
+2026-06-12 10:16:13,224 - bluezero.GATT - INFO - GATT application registered
+INFO:bluezero.GATT:GATT application registered
 Advertisement registered
 Remote WebRTC access started (outbound signaling)
+Connecting to signaling server ws://16.164.26.68:8765 ...
  * Serving Flask app 'web_server'
  * Debug mode: off
-WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+INFO:werkzeug:WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
  * Running on all addresses (0.0.0.0)
  * Running on http://127.0.0.1:5001
  * Running on http://192.168.1.224:5001
-Press CTRL+C to quit
-
-Exception in callback Transaction.__retry()
-handle: <TimerHandle when=3856.703609003 Transaction.__retry()>
-Traceback (most recent call last):
-  File "/usr/lib/python3.13/asyncio/selector_events.py", line 1268, in sendto
-    self._sock.sendto(data, addr)
-    ^^^^^^^^^^^^^^^^^
-AttributeError: 'NoneType' object has no attribute 'sendto'
-
-During handling of the above exception, another exception occurred:
-
-Traceback (most recent call last):
-  File "/usr/lib/python3.13/asyncio/events.py", line 89, in _run
-    self._context.run(self._callback, *self._args)
-    ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/nir/Desktop/server/venv/lib/python3.13/site-packages/aioice/stun.py", line 333, in __retry
-    self.__protocol.send_stun(self.__request, self.__addr)
-    ~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/nir/Desktop/server/venv/lib/python3.13/site-packages/aioice/ice.py", line 327, in send_stun
-    self.transport.sendto(bytes(message), addr)
-    ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^
-  File "/usr/lib/python3.13/asyncio/selector_events.py", line 1278, in sendto
-    self._fatal_error(
-    ~~~~~~~~~~~~~~~~~^
-        exc, 'Fatal write error on datagram transport')
-        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/usr/lib/python3.13/asyncio/selector_events.py", line 880, in _fatal_error
-    self._loop.call_exception_handler({
-    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-AttributeError: 'NoneType' object has no attribute 'call_exception_handler'
-Exception in callback Transaction.__retry()
-handle: <TimerHandle when=3856.725043158 Transaction.__retry()>
-Traceback (most recent call last):
-  File "/usr/lib/python3.13/asyncio/selector_events.py", line 1268, in sendto
-    self._sock.sendto(data, addr)
-    ^^^^^^^^^^^^^^^^^
-AttributeError: 'NoneType' object has no attribute 'sendto'
-
-During handling of the above exception, another exception occurred:
-
-Traceback (most recent call last):
-  File "/usr/lib/python3.13/asyncio/events.py", line 89, in _run
-    self._context.run(self._callback, *self._args)
-    ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/nir/Desktop/server/venv/lib/python3.13/site-packages/aioice/stun.py", line 333, in __retry
-    self.__protocol.send_stun(self.__request, self.__addr)
-    ~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/nir/Desktop/server/venv/lib/python3.13/site-packages/aioice/ice.py", line 327, in send_stun
-    self.transport.sendto(bytes(message), addr)
-    ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^
-  File "/usr/lib/python3.13/asyncio/selector_events.py", line 1278, in sendto
-    self._fatal_error(
-    ~~~~~~~~~~~~~~~~~^
-        exc, 'Fatal write error on datagram transport')
-        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/usr/lib/python3.13/asyncio/selector_events.py", line 880, in _fatal_error
-    self._loop.call_exception_handler({
-    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-AttributeError: 'NoneType' object has no attribute 'call_exception_handler'
-Exception in callback Transaction.__retry()
-handle: <TimerHandle when=3856.74531703 Transaction.__retry()>
-Traceback (most recent call last):
-  File "/usr/lib/python3.13/asyncio/selector_events.py", line 1268, in sendto
-    self._sock.sendto(data, addr)
-    ^^^^^^^^^^^^^^^^^
-AttributeError: 'NoneType' object has no attribute 'sendto'
-
-During handling of the above exception, another exception occurred:
-
-Traceback (most recent call last):
-  File "/usr/lib/python3.13/asyncio/events.py", line 89, in _run
-    self._context.run(self._callback, *self._args)
-    ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/nir/Desktop/server/venv/lib/python3.13/site-packages/aioice/stun.py", line 333, in __retry
-    self.__protocol.send_stun(self.__request, self.__addr)
-    ~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/nir/Desktop/server/venv/lib/python3.13/site-packages/aioice/ice.py", line 327, in send_stun
-    self.transport.sendto(bytes(message), addr)
-    ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^
-  File "/usr/lib/python3.13/asyncio/selector_events.py", line 1278, in sendto
-    self._fatal_error(
-    ~~~~~~~~~~~~~~~~~^
-        exc, 'Fatal write error on datagram transport')
-        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/usr/lib/python3.13/asyncio/selector_events.py", line 880, in _fatal_error
-    self._loop.call_exception_handler({
-    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-AttributeError: 'NoneType' object has no attribute 'call_exception_handler'
-Exception in callback Transaction.__retry()
-handle: <TimerHandle when=3856.765939034 Transaction.__retry()>
-Traceback (most recent call last):
-  File "/usr/lib/python3.13/asyncio/selector_events.py", line 1268, in sendto
-    self._sock.sendto(data, addr)
-    ^^^^^^^^^^^^^^^^^
-AttributeError: 'NoneType' object has no attribute 'sendto'
-
-During handling of the above exception, another exception occurred:
-
-Traceback (most recent call last):
-  File "/usr/lib/python3.13/asyncio/events.py", line 89, in _run
-    self._context.run(self._callback, *self._args)
-    ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/nir/Desktop/server/venv/lib/python3.13/site-packages/aioice/stun.py", line 333, in __retry
-    self.__protocol.send_stun(self.__request, self.__addr)
-    ~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/nir/Desktop/server/venv/lib/python3.13/site-packages/aioice/ice.py", line 327, in send_stun
-    self.transport.sendto(bytes(message), addr)
-    ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^
-  File "/usr/lib/python3.13/asyncio/selector_events.py", line 1278, in sendto
-    self._fatal_error(
-    ~~~~~~~~~~~~~~~~~^
-        exc, 'Fatal write error on datagram transport')
-        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/usr/lib/python3.13/asyncio/selector_events.py", line 880, in _fatal_error
-    self._loop.call_exception_handler({
-    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-AttributeError: 'NoneType' object has no attribute 'call_exception_handler'
-Exception in callback Transaction.__retry()
-handle: <TimerHandle when=3857.559507857 Transaction.__retry()>
-Traceback (most recent call last):
-  File "/usr/lib/python3.13/asyncio/selector_events.py", line 1268, in sendto
-    self._sock.sendto(data, addr)
-    ^^^^^^^^^^^^^^^^^
-AttributeError: 'NoneType' object has no attribute 'sendto'
-
-During handling of the above exception, another exception occurred:
-
-Traceback (most recent call last):
-  File "/usr/lib/python3.13/asyncio/events.py", line 89, in _run
-    self._context.run(self._callback, *self._args)
-    ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/nir/Desktop/server/venv/lib/python3.13/site-packages/aioice/stun.py", line 333, in __retry
-    self.__protocol.send_stun(self.__request, self.__addr)
-    ~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/nir/Desktop/server/venv/lib/python3.13/site-packages/aioice/ice.py", line 327, in send_stun
-    self.transport.sendto(bytes(message), addr)
-    ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^
-  File "/usr/lib/python3.13/asyncio/selector_events.py", line 1278, in sendto
-    self._fatal_error(
-    ~~~~~~~~~~~~~~~~~^
-        exc, 'Fatal write error on datagram transport')
-        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/usr/lib/python3.13/asyncio/selector_events.py", line 880, in _fatal_error
-    self._loop.call_exception_handler({
-    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-AttributeError: 'NoneType' object has no attribute 'call_exception_handler'
-Exception in callback Transaction.__retry()
-handle: <TimerHandle when=3857.579761544 Transaction.__retry()>
-Traceback (most recent call last):
-  File "/usr/lib/python3.13/asyncio/selector_events.py", line 1268, in sendto
-    self._sock.sendto(data, addr)
-    ^^^^^^^^^^^^^^^^^
-AttributeError: 'NoneType' object has no attribute 'sendto'
-
-During handling of the above exception, another exception occurred:
-
-Traceback (most recent call last):
-  File "/usr/lib/python3.13/asyncio/events.py", line 89, in _run
-    self._context.run(self._callback, *self._args)
-    ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/nir/Desktop/server/venv/lib/python3.13/site-packages/aioice/stun.py", line 333, in __retry
-    self.__protocol.send_stun(self.__request, self.__addr)
-    ~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/nir/Desktop/server/venv/lib/python3.13/site-packages/aioice/ice.py", line 327, in send_stun
-    self.transport.sendto(bytes(message), addr)
-    ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^
-  File "/usr/lib/python3.13/asyncio/selector_events.py", line 1278, in sendto
-    self._fatal_error(
-    ~~~~~~~~~~~~~~~~~^
-        exc, 'Fatal write error on datagram transport')
-        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/usr/lib/python3.13/asyncio/selector_events.py", line 880, in _fatal_error
-    self._loop.call_exception_handler({
-    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-AttributeError: 'NoneType' object has no attribute 'call_exception_handler'
-Exception in callback Transaction.__retry()
-handle: <TimerHandle when=3857.601024457 Transaction.__retry()>
-Traceback (most recent call last):
-  File "/usr/lib/python3.13/asyncio/selector_events.py", line 1268, in sendto
-    self._sock.sendto(data, addr)
-    ^^^^^^^^^^^^^^^^^
-AttributeError: 'NoneType' object has no attribute 'sendto'
-
-During handling of the above exception, another exception occurred:
-
-Traceback (most recent call last):
-  File "/usr/lib/python3.13/asyncio/events.py", line 89, in _run
-    self._context.run(self._callback, *self._args)
-    ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/nir/Desktop/server/venv/lib/python3.13/site-packages/aioice/stun.py", line 333, in __retry
-    self.__protocol.send_stun(self.__request, self.__addr)
-    ~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/nir/Desktop/server/venv/lib/python3.13/site-packages/aioice/ice.py", line 327, in send_stun
-    self.transport.sendto(bytes(message), addr)
-    ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^
-  File "/usr/lib/python3.13/asyncio/selector_events.py", line 1278, in sendto
-    self._fatal_error(
-    ~~~~~~~~~~~~~~~~~^
-        exc, 'Fatal write error on datagram transport')
-        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/usr/lib/python3.13/asyncio/selector_events.py", line 880, in _fatal_error
-    self._loop.call_exception_handler({
-    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-AttributeError: 'NoneType' object has no attribute 'call_exception_handler'
-Exception in callback Transaction.__retry()
-handle: <TimerHandle when=3857.662687967 Transaction.__retry()>
-Traceback (most recent call last):
-  File "/usr/lib/python3.13/asyncio/selector_events.py", line 1268, in sendto
-    self._sock.sendto(data, addr)
-    ^^^^^^^^^^^^^^^^^
-AttributeError: 'NoneType' object has no attribute 'sendto'
-
-During handling of the above exception, another exception occurred:
-
-Traceback (most recent call last):
-  File "/usr/lib/python3.13/asyncio/events.py", line 89, in _run
-    self._context.run(self._callback, *self._args)
-    ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/nir/Desktop/server/venv/lib/python3.13/site-packages/aioice/stun.py", line 333, in __retry
-    self.__protocol.send_stun(self.__request, self.__addr)
-    ~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/nir/Desktop/server/venv/lib/python3.13/site-packages/aioice/ice.py", line 327, in send_stun
-    self.transport.sendto(bytes(message), addr)
-    ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^
-  File "/usr/lib/python3.13/asyncio/selector_events.py", line 1278, in sendto
-    self._fatal_error(
-    ~~~~~~~~~~~~~~~~~^
-        exc, 'Fatal write error on datagram transport')
-        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/usr/lib/python3.13/asyncio/selector_events.py", line 880, in _fatal_error
-    self._loop.call_exception_handler({
-    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-AttributeError: 'NoneType' object has no attribute 'call_exception_handler'
-Exception in callback Transaction.__retry()
-handle: <TimerHandle when=3857.683912806 Transaction.__retry()>
-Traceback (most recent call last):
-  File "/usr/lib/python3.13/asyncio/selector_events.py", line 1268, in sendto
-    self._sock.sendto(data, addr)
-    ^^^^^^^^^^^^^^^^^
-AttributeError: 'NoneType' object has no attribute 'sendto'
-
-During handling of the above exception, another exception occurred:
-
-Traceback (most recent call last):
-  File "/usr/lib/python3.13/asyncio/events.py", line 89, in _run
-    self._context.run(self._callback, *self._args)
-    ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/nir/Desktop/server/venv/lib/python3.13/site-packages/aioice/stun.py", line 333, in __retry
-    self.__protocol.send_stun(self.__request, self.__addr)
-    ~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/nir/Desktop/server/venv/lib/python3.13/site-packages/aioice/ice.py", line 327, in send_stun
-    self.transport.sendto(bytes(message), addr)
-    ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^
-  File "/usr/lib/python3.13/asyncio/selector_events.py", line 1278, in sendto
-    self._fatal_error(
-    ~~~~~~~~~~~~~~~~~^
-        exc, 'Fatal write error on datagram transport')
-        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/usr/lib/python3.13/asyncio/selector_events.py", line 880, in _fatal_error
-    self._loop.call_exception_handler({
-    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-AttributeError: 'NoneType' object has no attribute 'call_exception_handler'
-socket.send() raised exception.
-socket.send() raised exception.
-socket.send() raised exception.
-socket.send() raised exception.
-socket.send() raised exception.
-socket.send() raised exception.
-socket.send() raised exception.
+INFO:werkzeug:Press CTRL+C to quit
+INFO:remote_access:Connected to signaling server as monitor e4373067-012a-4d94-a17d-c1a74542f588
+Connected to signaling server as monitor e4373067-012a-4d94-a17d-c1a74542f588
+2026-06-12 10:17:29,434 - bluezero.localGATT - INFO - Notifying already, nothing to do
+INFO:bluezero.localGATT:Notifying already, nothing to do
+2026-06-12 10:17:29,748 - bluezero.localGATT - INFO - Notifying already, nothing to do
+INFO:bluezero.localGATT:Notifying already, nothing to do
+2026-06-12 10:17:29,928 - bluezero.localGATT - INFO - Notifying already, nothing to do
+INFO:bluezero.localGATT:Notifying already, nothing to do
+2026-06-12 10:17:30,108 - bluezero.localGATT - INFO - Notifying already, nothing to do
+INFO:bluezero.localGATT:Notifying already, nothing to do
+INFO:ble_wifi_provision:Provision status: scanning - Scanning Wi-Fi networks...
+INFO:ble_wifi_provision:Provision status: idle - Found 4 network(s)
+INFO:ble_wifi_provision:Provision status: connecting - Connecting to BenBoaz...
+INFO:ble_wifi_provision:Provision status: connected - Connected. IP: 192.168.1.224
+INFO:werkzeug:192.168.1.106 - - [12/Jun/2026 10:18:10] "GET /health HTTP/1.1" 200 -
+INFO:werkzeug:192.168.1.106 - - [12/Jun/2026 10:18:10] "GET /video_feed?t=1781248690600 HTTP/1.1" 200 -
+INFO:werkzeug:192.168.1.106 - - [12/Jun/2026 10:18:10] "GET /favicon.ico HTTP/1.1" 404 -
+INFO:remote_access:Remote WebRTC using TURN relay at turn:16.164.26.68:3478
+Remote WebRTC using TURN relay at turn:16.164.26.68:3478
+INFO:aioice.turn:TURN allocation created ('172.31.17.33', 59591) (expires in 600 seconds)
+INFO:remote_access:Sent WebRTC answer to viewer
+INFO:aioice.ice:Connection(0) Check CandidatePair(('2a00:a041:e48e:5d00:c7da:704e:5ff1:770d', 44563) -> ('2a00:a041:e48e:5d00:b44d:19ff:fefa:1e6e', 38627)) State.FROZEN -> State.WAITING
+INFO:aioice.ice:Connection(0) Check CandidatePair(('192.168.1.224', 59295) -> ('192.168.1.106', 44728)) State.FROZEN -> State.WAITING
+INFO:aioice.ice:Connection(0) Check CandidatePair(('172.17.0.1', 56283) -> ('192.168.1.106', 44728)) State.FROZEN -> State.WAITING
+INFO:aioice.ice:Connection(0) Check CandidatePair(('2a00:a041:e48e:5d00:c7da:704e:5ff1:770d', 44563) -> ('2a00:a041:e48e:5d00:b44d:19ff:fefa:1e6e', 45940)) State.FROZEN -> State.WAITING
+INFO:aioice.ice:Connection(0) Check CandidatePair(('172.31.17.33', 59591) -> ('192.168.1.106', 44728)) State.FROZEN -> State.WAITING
+INFO:remote_access:WebRTC connection state: connecting
+INFO:aioice.ice:Connection(0) Check CandidatePair(('2a00:a041:e48e:5d00:c7da:704e:5ff1:770d', 44563) -> ('2a00:a041:e48e:5d00:b44d:19ff:fefa:1e6e', 38627)) State.WAITING -> State.IN_PROGRESS
+INFO:aioice.ice:Connection(0) Check CandidatePair(('192.168.1.224', 59295) -> ('192.168.1.106', 44728)) State.WAITING -> State.IN_PROGRESS
+INFO:aioice.ice:Connection(0) Check CandidatePair(('192.168.1.224', 59295) -> ('192.168.1.106', 44728)) State.IN_PROGRESS -> State.SUCCEEDED
+INFO:aioice.ice:Connection(0) Check CandidatePair(('192.168.1.224', 59295) -> ('192.168.1.106', 41655)) State.FROZEN -> State.WAITING
+INFO:aioice.ice:Connection(0) Check CandidatePair(('192.168.1.224', 59295) -> ('5.29.12.67', 34820)) State.FROZEN -> State.WAITING
+INFO:aioice.ice:Connection(0) Check CandidatePair(('192.168.1.224', 59295) -> ('5.28.189.89', 44343)) State.FROZEN -> State.WAITING
+INFO:aioice.ice:Connection(0) Check CandidatePair(('192.168.1.224', 59295) -> ('172.31.17.33', 61520)) State.FROZEN -> State.WAITING
+INFO:aioice.ice:Connection(0) Check CandidatePair(('192.168.1.224', 59295) -> ('172.31.17.33', 59209)) State.FROZEN -> State.WAITING
+INFO:aioice.ice:Connection(0) Check CandidatePair(('192.168.1.224', 59295) -> ('172.31.17.33', 54291)) State.FROZEN -> State.WAITING
+INFO:aioice.ice:Connection(0) Check CandidatePair(('192.168.1.224', 59295) -> ('172.31.17.33', 58781)) State.FROZEN -> State.WAITING
+INFO:aioice.ice:Connection(0) Check CandidatePair(('172.17.0.1', 56283) -> ('192.168.1.106', 44728)) State.WAITING -> State.IN_PROGRESS
+INFO:aioice.ice:Connection(0) Check CandidatePair(('172.17.0.1', 56283) -> ('192.168.1.106', 44728)) State.IN_PROGRESS -> State.SUCCEEDED
+INFO:aioice.ice:Connection(0) Check CandidatePair(('172.17.0.1', 56283) -> ('192.168.1.106', 41655)) State.FROZEN -> State.WAITING
+INFO:aioice.ice:Connection(0) Check CandidatePair(('172.17.0.1', 56283) -> ('5.29.12.67', 34820)) State.FROZEN -> State.WAITING
+INFO:aioice.ice:Connection(0) Check CandidatePair(('172.17.0.1', 56283) -> ('5.28.189.89', 44343)) State.FROZEN -> State.WAITING
+INFO:aioice.ice:Connection(0) Check CandidatePair(('172.17.0.1', 56283) -> ('172.31.17.33', 61520)) State.FROZEN -> State.WAITING
+INFO:aioice.ice:Connection(0) Check CandidatePair(('172.17.0.1', 56283) -> ('172.31.17.33', 59209)) State.FROZEN -> State.WAITING
+INFO:aioice.ice:Connection(0) Check CandidatePair(('172.17.0.1', 56283) -> ('172.31.17.33', 54291)) State.FROZEN -> State.WAITING
+INFO:aioice.ice:Connection(0) Check CandidatePair(('172.17.0.1', 56283) -> ('172.31.17.33', 58781)) State.FROZEN -> State.WAITING
+INFO:aioice.ice:Connection(0) Check CandidatePair(('2a00:a041:e48e:5d00:c7da:704e:5ff1:770d', 44563) -> ('2a00:a041:e48e:5d00:b44d:19ff:fefa:1e6e', 45940)) State.WAITING -> State.IN_PROGRESS
+INFO:aioice.ice:Connection(0) Check CandidatePair(('192.168.1.224', 59295) -> ('192.168.1.106', 41655)) State.WAITING -> State.FAILED
+INFO:aioice.ice:Connection(0) Check CandidatePair(('172.17.0.1', 56283) -> ('192.168.1.106', 41655)) State.WAITING -> State.FAILED
+INFO:aioice.ice:Connection(0) Check CandidatePair(('2a00:a041:e48e:5d00:c7da:704e:5ff1:770d', 44563) -> ('2a00:a041:e48e:5d00:ad26:11ea:63f4:64cf', 38627)) State.FROZEN -> State.FAILED
+INFO:aioice.ice:Connection(0) Check CandidatePair(('192.168.1.224', 59295) -> ('5.29.12.67', 34820)) State.WAITING -> State.FAILED
+INFO:aioice.ice:Connection(0) Check CandidatePair(('172.17.0.1', 56283) -> ('5.29.12.67', 34820)) State.WAITING -> State.FAILED
+INFO:aioice.ice:Connection(0) Check CandidatePair(('2a00:a041:e48e:5d00:c7da:704e:5ff1:770d', 44563) -> ('2a01:73c0:94a:23dd:ee8:44a:2195:8196', 45940)) State.FROZEN -> State.FAILED
+INFO:aioice.ice:Connection(0) Check CandidatePair(('192.168.1.224', 59295) -> ('5.28.189.89', 44343)) State.WAITING -> State.FAILED
+INFO:aioice.ice:Connection(0) Check CandidatePair(('172.17.0.1', 56283) -> ('5.28.189.89', 44343)) State.WAITING -> State.FAILED
+INFO:aioice.ice:Connection(0) Check CandidatePair(('192.168.1.224', 59295) -> ('172.31.17.33', 61520)) State.WAITING -> State.FAILED
+INFO:aioice.ice:Connection(0) Check CandidatePair(('172.17.0.1', 56283) -> ('172.31.17.33', 61520)) State.WAITING -> State.FAILED
+INFO:aioice.ice:Connection(0) Check CandidatePair(('192.168.1.224', 59295) -> ('172.31.17.33', 59209)) State.WAITING -> State.FAILED
+INFO:aioice.ice:Connection(0) Check CandidatePair(('172.17.0.1', 56283) -> ('172.31.17.33', 59209)) State.WAITING -> State.FAILED
+INFO:aioice.ice:Connection(0) Check CandidatePair(('192.168.1.224', 59295) -> ('172.31.17.33', 54291)) State.WAITING -> State.FAILED
+INFO:aioice.ice:Connection(0) Check CandidatePair(('172.17.0.1', 56283) -> ('172.31.17.33', 54291)) State.WAITING -> State.FAILED
+INFO:aioice.ice:Connection(0) Check CandidatePair(('192.168.1.224', 59295) -> ('172.31.17.33', 58781)) State.WAITING -> State.FAILED
+INFO:aioice.ice:Connection(0) Check CandidatePair(('172.17.0.1', 56283) -> ('172.31.17.33', 58781)) State.WAITING -> State.FAILED
+INFO:aioice.ice:Connection(0) Check CandidatePair(('172.31.17.33', 59591) -> ('192.168.1.106', 44728)) State.WAITING -> State.FAILED
+INFO:aioice.ice:Connection(0) Check CandidatePair(('172.31.17.33', 59591) -> ('192.168.1.106', 41655)) State.FROZEN -> State.FAILED
+INFO:aioice.ice:Connection(0) Check CandidatePair(('172.31.17.33', 59591) -> ('5.29.12.67', 34820)) State.FROZEN -> State.FAILED
+INFO:aioice.ice:Connection(0) Check CandidatePair(('172.31.17.33', 59591) -> ('5.28.189.89', 44343)) State.FROZEN -> State.FAILED
+INFO:aioice.ice:Connection(0) Check CandidatePair(('172.31.17.33', 59591) -> ('172.31.17.33', 61520)) State.FROZEN -> State.FAILED
+INFO:aioice.ice:Connection(0) Check CandidatePair(('172.31.17.33', 59591) -> ('172.31.17.33', 59209)) State.FROZEN -> State.FAILED
+INFO:aioice.ice:Connection(0) Check CandidatePair(('172.31.17.33', 59591) -> ('172.31.17.33', 54291)) State.FROZEN -> State.FAILED
+INFO:aioice.ice:Connection(0) Check CandidatePair(('172.31.17.33', 59591) -> ('172.31.17.33', 58781)) State.FROZEN -> State.FAILED
+INFO:aioice.ice:Connection(0) ICE completed
+INFO:aioice.ice:Connection(0) Check CandidatePair(('2a00:a041:e48e:5d00:c7da:704e:5ff1:770d', 44563) -> ('2a00:a041:e48e:5d00:ad26:11ea:63f4:64cf', 38627)) State.FAILED -> State.IN_PROGRESS
+INFO:aioice.ice:Connection(0) Check CandidatePair(('2a00:a041:e48e:5d00:c7da:704e:5ff1:770d', 44563) -> ('2a00:a041:e48e:5d00:b44d:19ff:fefa:1e6e', 38627)) failed : source address mismatch
+INFO:aioice.ice:Connection(0) Check CandidatePair(('2a00:a041:e48e:5d00:c7da:704e:5ff1:770d', 44563) -> ('2a00:a041:e48e:5d00:b44d:19ff:fefa:1e6e', 38627)) State.IN_PROGRESS -> State.FAILED
+INFO:aioice.ice:Connection(0) Check CandidatePair(('2a00:a041:e48e:5d00:c7da:704e:5ff1:770d', 44563) -> ('2a00:a041:e48e:5d00:ad26:11ea:63f4:64cf', 38627)) State.IN_PROGRESS -> State.SUCCEEDED
+INFO:remote_access:WebRTC connection state: connected
+INFO:remote_access:WebRTC connection state: closed
+INFO:aioice.turn:TURN allocation deleted ('172.31.17.33', 59591)
+INFO:remote_access:Remote WebRTC using TURN relay at turn:16.164.26.68:3478
+Remote WebRTC using TURN relay at turn:16.164.26.68:3478
+INFO:aioice.turn:TURN allocation created ('172.31.17.33', 60272) (expires in 600 seconds)
+INFO:remote_access:Sent WebRTC answer to viewer
+INFO:aioice.ice:Connection(1) Check CandidatePair(('2a00:a041:e48e:5d00:c7da:704e:5ff1:770d', 39808) -> ('2a00:a041:e48e:5d00:b44d:19ff:fefa:1e6e', 47269)) State.FROZEN -> State.WAITING
+INFO:aioice.ice:Connection(1) Check CandidatePair(('192.168.1.224', 39285) -> ('192.168.1.106', 38140)) State.FROZEN -> State.WAITING
+INFO:aioice.ice:Connection(1) Check CandidatePair(('172.17.0.1', 34804) -> ('192.168.1.106', 38140)) State.FROZEN -> State.WAITING
+INFO:aioice.ice:Connection(1) Check CandidatePair(('2a00:a041:e48e:5d00:c7da:704e:5ff1:770d', 39808) -> ('2a00:a041:e48e:5d00:b44d:19ff:fefa:1e6e', 38551)) State.FROZEN -> State.WAITING
+INFO:aioice.ice:Connection(1) Check CandidatePair(('172.31.17.33', 60272) -> ('192.168.1.106', 38140)) State.FROZEN -> State.WAITING
+INFO:remote_access:WebRTC connection state: connecting
+INFO:aioice.ice:Connection(1) Check CandidatePair(('2a00:a041:e48e:5d00:c7da:704e:5ff1:770d', 39808) -> ('2a00:a041:e48e:5d00:b44d:19ff:fefa:1e6e', 47269)) State.WAITING -> State.IN_PROGRESS
+INFO:aioice.ice:Connection(1) Check CandidatePair(('192.168.1.224', 39285) -> ('192.168.1.106', 38140)) State.WAITING -> State.IN_PROGRESS
+INFO:aioice.ice:Connection(1) Check CandidatePair(('172.17.0.1', 34804) -> ('192.168.1.106', 38140)) State.WAITING -> State.IN_PROGRESS
+INFO:aioice.ice:Connection(1) Check CandidatePair(('2a00:a041:e48e:5d00:c7da:704e:5ff1:770d', 39808) -> ('2a00:a041:e48e:5d00:b44d:19ff:fefa:1e6e', 47269)) failed : source address mismatch
+INFO:aioice.ice:Connection(1) Check CandidatePair(('2a00:a041:e48e:5d00:c7da:704e:5ff1:770d', 39808) -> ('2a00:a041:e48e:5d00:b44d:19ff:fefa:1e6e', 47269)) State.IN_PROGRESS -> State.FAILED
+INFO:aioice.ice:Connection(1) Check CandidatePair(('192.168.1.224', 39285) -> ('192.168.1.106', 38140)) State.IN_PROGRESS -> State.SUCCEEDED
+INFO:aioice.ice:Connection(1) Check CandidatePair(('192.168.1.224', 39285) -> ('192.168.1.106', 39500)) State.FROZEN -> State.WAITING
+INFO:aioice.ice:Connection(1) Check CandidatePair(('192.168.1.224', 39285) -> ('5.29.12.67', 34824)) State.FROZEN -> State.WAITING
+INFO:aioice.ice:Connection(1) Check CandidatePair(('192.168.1.224', 39285) -> ('5.28.189.89', 44364)) State.FROZEN -> State.WAITING
+INFO:aioice.ice:Connection(1) Check CandidatePair(('192.168.1.224', 39285) -> ('172.31.17.33', 51004)) State.FROZEN -> State.WAITING
+INFO:aioice.ice:Connection(1) Check CandidatePair(('192.168.1.224', 39285) -> ('172.31.17.33', 55185)) State.FROZEN -> State.WAITING
+INFO:aioice.ice:Connection(1) Check CandidatePair(('192.168.1.224', 39285) -> ('172.31.17.33', 57640)) State.FROZEN -> State.WAITING
+INFO:aioice.ice:Connection(1) Check CandidatePair(('192.168.1.224', 39285) -> ('172.31.17.33', 61541)) State.FROZEN -> State.WAITING
+INFO:aioice.ice:Connection(1) Check CandidatePair(('172.17.0.1', 34804) -> ('192.168.1.106', 38140)) State.IN_PROGRESS -> State.SUCCEEDED
+INFO:aioice.ice:Connection(1) Check CandidatePair(('172.17.0.1', 34804) -> ('192.168.1.106', 39500)) State.FROZEN -> State.WAITING
+INFO:aioice.ice:Connection(1) Check CandidatePair(('172.17.0.1', 34804) -> ('5.29.12.67', 34824)) State.FROZEN -> State.WAITING
+INFO:aioice.ice:Connection(1) Check CandidatePair(('172.17.0.1', 34804) -> ('5.28.189.89', 44364)) State.FROZEN -> State.WAITING
+INFO:aioice.ice:Connection(1) Check CandidatePair(('172.17.0.1', 34804) -> ('172.31.17.33', 51004)) State.FROZEN -> State.WAITING
+INFO:aioice.ice:Connection(1) Check CandidatePair(('172.17.0.1', 34804) -> ('172.31.17.33', 55185)) State.FROZEN -> State.WAITING
+INFO:aioice.ice:Connection(1) Check CandidatePair(('172.17.0.1', 34804) -> ('172.31.17.33', 57640)) State.FROZEN -> State.WAITING
+INFO:aioice.ice:Connection(1) Check CandidatePair(('172.17.0.1', 34804) -> ('172.31.17.33', 61541)) State.FROZEN -> State.WAITING
+INFO:aioice.ice:Connection(1) Check CandidatePair(('2a00:a041:e48e:5d00:c7da:704e:5ff1:770d', 39808) -> ('2a00:a041:e48e:5d00:b44d:19ff:fefa:1e6e', 38551)) State.WAITING -> State.IN_PROGRESS
+INFO:aioice.ice:Connection(1) Check CandidatePair(('192.168.1.224', 39285) -> ('192.168.1.106', 39500)) State.WAITING -> State.IN_PROGRESS
+INFO:aioice.ice:Connection(1) Check CandidatePair(('172.17.0.1', 34804) -> ('192.168.1.106', 39500)) State.WAITING -> State.IN_PROGRESS
+INFO:aioice.ice:Connection(1) Check CandidatePair(('192.168.1.224', 39285) -> ('5.29.12.67', 34824)) State.WAITING -> State.IN_PROGRESS
+INFO:aioice.ice:Connection(1) Check CandidatePair(('172.17.0.1', 34804) -> ('5.29.12.67', 34824)) State.WAITING -> State.IN_PROGRESS
+INFO:aioice.ice:Connection(1) Check CandidatePair(('192.168.1.224', 39285) -> ('5.28.189.89', 44364)) State.WAITING -> State.IN_PROGRESS
+INFO:aioice.ice:Connection(1) Check CandidatePair(('172.17.0.1', 34804) -> ('5.28.189.89', 44364)) State.WAITING -> State.IN_PROGRESS
+INFO:aioice.ice:Connection(1) Check CandidatePair(('2a00:a041:e48e:5d00:c7da:704e:5ff1:770d', 39808) -> ('2a00:a041:e48e:5d00:ad26:11ea:63f4:64cf', 47269)) State.FROZEN -> State.FAILED
+INFO:aioice.ice:Connection(1) Check CandidatePair(('2a00:a041:e48e:5d00:c7da:704e:5ff1:770d', 39808) -> ('2a01:73c0:94a:23dd:ee8:44a:2195:8196', 38551)) State.FROZEN -> State.FAILED
+INFO:aioice.ice:Connection(1) Check CandidatePair(('192.168.1.224', 39285) -> ('172.31.17.33', 51004)) State.WAITING -> State.FAILED
+INFO:aioice.ice:Connection(1) Check CandidatePair(('172.17.0.1', 34804) -> ('172.31.17.33', 51004)) State.WAITING -> State.FAILED
+INFO:aioice.ice:Connection(1) Check CandidatePair(('192.168.1.224', 39285) -> ('172.31.17.33', 55185)) State.WAITING -> State.FAILED
+INFO:aioice.ice:Connection(1) Check CandidatePair(('172.17.0.1', 34804) -> ('172.31.17.33', 55185)) State.WAITING -> State.FAILED
+INFO:aioice.ice:Connection(1) Check CandidatePair(('192.168.1.224', 39285) -> ('172.31.17.33', 57640)) State.WAITING -> State.FAILED
+INFO:aioice.ice:Connection(1) Check CandidatePair(('172.17.0.1', 34804) -> ('172.31.17.33', 57640)) State.WAITING -> State.FAILED
+INFO:aioice.ice:Connection(1) Check CandidatePair(('192.168.1.224', 39285) -> ('172.31.17.33', 61541)) State.WAITING -> State.FAILED
+INFO:aioice.ice:Connection(1) Check CandidatePair(('172.17.0.1', 34804) -> ('172.31.17.33', 61541)) State.WAITING -> State.FAILED
+INFO:aioice.ice:Connection(1) Check CandidatePair(('172.31.17.33', 60272) -> ('192.168.1.106', 38140)) State.WAITING -> State.FAILED
+INFO:aioice.ice:Connection(1) Check CandidatePair(('172.31.17.33', 60272) -> ('192.168.1.106', 39500)) State.FROZEN -> State.FAILED
+INFO:aioice.ice:Connection(1) Check CandidatePair(('172.31.17.33', 60272) -> ('5.29.12.67', 34824)) State.FROZEN -> State.FAILED
+INFO:aioice.ice:Connection(1) Check CandidatePair(('172.31.17.33', 60272) -> ('5.28.189.89', 44364)) State.FROZEN -> State.FAILED
+INFO:aioice.ice:Connection(1) Check CandidatePair(('172.31.17.33', 60272) -> ('172.31.17.33', 51004)) State.FROZEN -> State.FAILED
+INFO:aioice.ice:Connection(1) Check CandidatePair(('172.31.17.33', 60272) -> ('172.31.17.33', 55185)) State.FROZEN -> State.FAILED
+INFO:aioice.ice:Connection(1) Check CandidatePair(('172.31.17.33', 60272) -> ('172.31.17.33', 57640)) State.FROZEN -> State.FAILED
+INFO:aioice.ice:Connection(1) Check CandidatePair(('172.31.17.33', 60272) -> ('172.31.17.33', 61541)) State.FROZEN -> State.FAILED
+INFO:aioice.ice:Connection(1) ICE completed
+INFO:remote_access:WebRTC connection state: connected
+INFO:aioice.ice:Connection(1) Check CandidatePair(('2a00:a041:e48e:5d00:c7da:704e:5ff1:770d', 39808) -> ('2a00:a041:e48e:5d00:ad26:11ea:63f4:64cf', 47269)) State.FAILED -> State.IN_PROGRESS
+INFO:aioice.ice:Connection(1) Check CandidatePair(('2a00:a041:e48e:5d00:c7da:704e:5ff1:770d', 39808) -> ('2a00:a041:e48e:5d00:ad26:11ea:63f4:64cf', 47269)) State.IN_PROGRESS -> State.SUCCEEDED
+INFO:remote_access:WebRTC connection state: closed
+INFO:aioice.turn:TURN allocation deleted ('172.31.17.33', 60272)
+INFO:remote_access:Remote WebRTC using TURN relay at turn:16.164.26.68:3478
+Remote WebRTC using TURN relay at turn:16.164.26.68:3478
+INFO:aioice.turn:TURN allocation created ('172.31.17.33', 59420) (expires in 600 seconds)
+INFO:remote_access:Sent WebRTC answer to viewer
+INFO:aioice.ice:Connection(2) Check CandidatePair(('2a00:a041:e48e:5d00:c7da:704e:5ff1:770d', 47853) -> ('2a01:73c0:94a:23dd:ee8:44a:2195:8196', 48842)) State.FROZEN -> State.WAITING
+INFO:aioice.ice:Connection(2) Check CandidatePair(('192.168.1.224', 48901) -> ('10.27.101.74', 48071)) State.FROZEN -> State.WAITING
+INFO:aioice.ice:Connection(2) Check CandidatePair(('172.17.0.1', 47549) -> ('10.27.101.74', 48071)) State.FROZEN -> State.WAITING
+INFO:aioice.ice:Connection(2) Check CandidatePair(('2a00:a041:e48e:5d00:c7da:704e:5ff1:770d', 47853) -> ('2a01:73c0:94a:23dd:ee8:44a:2195:8196', 48842)) State.FROZEN -> State.WAITING
+INFO:aioice.ice:Connection(2) Check CandidatePair(('172.31.17.33', 59420) -> ('10.27.101.74', 48071)) State.FROZEN -> State.WAITING
+INFO:remote_access:WebRTC connection state: connecting
+INFO:aioice.ice:Connection(2) Check CandidatePair(('2a00:a041:e48e:5d00:c7da:704e:5ff1:770d', 47853) -> ('2a01:73c0:94a:23dd:ee8:44a:2195:8196', 48842)) State.WAITING -> State.IN_PROGRESS
+INFO:aioice.ice:Connection(2) Check CandidatePair(('192.168.1.224', 48901) -> ('10.27.101.74', 48071)) State.WAITING -> State.IN_PROGRESS
+INFO:aioice.ice:Connection(2) Check CandidatePair(('172.17.0.1', 47549) -> ('10.27.101.74', 48071)) State.WAITING -> State.IN_PROGRESS
+INFO:aioice.ice:Connection(2) Check CandidatePair(('2a00:a041:e48e:5d00:c7da:704e:5ff1:770d', 47853) -> ('2a01:73c0:94a:23dd:ee8:44a:2195:8196', 48842)) State.WAITING -> State.IN_PROGRESS
+INFO:aioice.ice:Connection(2) Check CandidatePair(('172.31.17.33', 59420) -> ('10.27.101.74', 48071)) State.WAITING -> State.IN_PROGRESS
+INFO:aioice.turn:TURN channel bound 16384 ('10.27.101.74', 48071)
+INFO:aioice.ice:Connection(2) Check CandidatePair(('192.168.1.224', 48901) -> ('5.28.189.89', 44359)) State.FROZEN -> State.IN_PROGRESS
+INFO:aioice.ice:Connection(2) Check CandidatePair(('2a00:a041:e48e:5d00:c7da:704e:5ff1:770d', 47853) -> ('2a01:73c0:94a:23dd:ee8:44a:2195:8196', 48842)) State.IN_PROGRESS -> State.SUCCEEDED
+INFO:aioice.ice:Connection(2) Check CandidatePair(('172.17.0.1', 47549) -> ('5.28.189.89', 44359)) State.FROZEN -> State.IN_PROGRESS
+INFO:aioice.ice:Connection(2) Check CandidatePair(('192.168.1.224', 48901) -> ('172.31.17.33', 51287)) State.FROZEN -> State.IN_PROGRESS
+INFO:aioice.ice:Connection(2) Check CandidatePair(('172.17.0.1', 47549) -> ('172.31.17.33', 51287)) State.FROZEN -> State.IN_PROGRESS
+INFO:aioice.ice:Connection(2) Check CandidatePair(('192.168.1.224', 48901) -> ('172.31.17.33', 54401)) State.FROZEN -> State.IN_PROGRESS
+INFO:aioice.ice:Connection(2) Check CandidatePair(('172.17.0.1', 47549) -> ('172.31.17.33', 54401)) State.FROZEN -> State.IN_PROGRESS
+INFO:aioice.ice:Connection(2) Check CandidatePair(('172.31.17.33', 59420) -> ('5.28.189.89', 44359)) State.FROZEN -> State.IN_PROGRESS
+INFO:aioice.turn:TURN channel bound 16385 ('5.28.189.89', 44359)
+INFO:aioice.ice:Connection(2) Check CandidatePair(('172.31.17.33', 59420) -> ('172.31.17.33', 51287)) State.FROZEN -> State.IN_PROGRESS
+INFO:aioice.turn:TURN channel bound 16386 ('172.31.17.33', 51287)
+INFO:aioice.ice:Connection(2) Check CandidatePair(('172.31.17.33', 59420) -> ('172.31.17.33', 54401)) State.FROZEN -> State.IN_PROGRESS
+INFO:aioice.turn:TURN channel bound 16387 ('172.31.17.33', 54401)
+INFO:aioice.ice:Connection(2) Check CandidatePair(('172.31.17.33', 59420) -> ('172.31.17.33', 51287)) State.IN_PROGRESS -> State.SUCCEEDED
+INFO:aioice.ice:Connection(2) Check CandidatePair(('172.31.17.33', 59420) -> ('172.31.17.33', 54401)) State.IN_PROGRESS -> State.SUCCEEDED
+INFO:aioice.ice:Connection(2) Check CandidatePair(('2a00:a041:e48e:5d00:c7da:704e:5ff1:770d', 47853) -> ('2a01:73c0:94a:23dd:ee8:44a:2195:8196', 48842)) State.IN_PROGRESS -> State.SUCCEEDED
+INFO:aioice.ice:Connection(2) ICE completed
+INFO:remote_access:WebRTC connection state: closed
+INFO:aioice.turn:TURN allocation deleted ('172.31.17.33', 59420)
+INFO:remote_access:Remote WebRTC using TURN relay at turn:16.164.26.68:3478
+Remote WebRTC using TURN relay at turn:16.164.26.68:3478
+INFO:aioice.turn:TURN allocation created ('172.31.17.33', 53537) (expires in 600 seconds)
+INFO:remote_access:Sent WebRTC answer to viewer
+INFO:aioice.ice:Connection(3) Check CandidatePair(('2a00:a041:e48e:5d00:c7da:704e:5ff1:770d', 36638) -> ('2a01:73c0:94a:23dd:ee8:44a:2195:8196', 39460)) State.FROZEN -> State.WAITING
+INFO:aioice.ice:Connection(3) Check CandidatePair(('192.168.1.224', 35560) -> ('10.27.101.74', 45175)) State.FROZEN -> State.WAITING
+INFO:aioice.ice:Connection(3) Check CandidatePair(('172.17.0.1', 37377) -> ('10.27.101.74', 45175)) State.FROZEN -> State.WAITING
+INFO:aioice.ice:Connection(3) Check CandidatePair(('2a00:a041:e48e:5d00:c7da:704e:5ff1:770d', 36638) -> ('2a01:73c0:94a:23dd:ee8:44a:2195:8196', 39460)) State.FROZEN -> State.WAITING
+INFO:aioice.ice:Connection(3) Check CandidatePair(('172.31.17.33', 53537) -> ('10.27.101.74', 45175)) State.FROZEN -> State.WAITING
+INFO:remote_access:WebRTC connection state: connecting
+INFO:aioice.ice:Connection(3) Check CandidatePair(('2a00:a041:e48e:5d00:c7da:704e:5ff1:770d', 36638) -> ('2a01:73c0:94a:23dd:ee8:44a:2195:8196', 39460)) State.WAITING -> State.IN_PROGRESS
+INFO:aioice.ice:Connection(3) Check CandidatePair(('192.168.1.224', 35560) -> ('10.27.101.74', 45175)) State.WAITING -> State.IN_PROGRESS
+INFO:aioice.ice:Connection(3) Check CandidatePair(('172.17.0.1', 37377) -> ('10.27.101.74', 45175)) State.WAITING -> State.IN_PROGRESS
+INFO:aioice.ice:Connection(3) Check CandidatePair(('2a00:a041:e48e:5d00:c7da:704e:5ff1:770d', 36638) -> ('2a01:73c0:94a:23dd:ee8:44a:2195:8196', 39460)) State.WAITING -> State.IN_PROGRESS
+INFO:aioice.ice:Connection(3) Check CandidatePair(('172.31.17.33', 53537) -> ('10.27.101.74', 45175)) State.WAITING -> State.IN_PROGRESS
+INFO:aioice.turn:TURN channel bound 16384 ('10.27.101.74', 45175)
+INFO:aioice.ice:Connection(3) Check CandidatePair(('192.168.1.224', 35560) -> ('5.28.189.89', 44407)) State.FROZEN -> State.IN_PROGRESS
+INFO:aioice.ice:Connection(3) Check CandidatePair(('172.17.0.1', 37377) -> ('5.28.189.89', 44407)) State.FROZEN -> State.IN_PROGRESS
+INFO:aioice.ice:Connection(3) Check CandidatePair(('192.168.1.224', 35560) -> ('172.31.17.33', 54595)) State.FROZEN -> State.IN_PROGRESS
+INFO:aioice.ice:Connection(3) Check CandidatePair(('172.17.0.1', 37377) -> ('172.31.17.33', 54595)) State.FROZEN -> State.IN_PROGRESS
+INFO:aioice.ice:Connection(3) Check CandidatePair(('192.168.1.224', 35560) -> ('172.31.17.33', 50828)) State.FROZEN -> State.IN_PROGRESS
+INFO:aioice.ice:Connection(3) Check CandidatePair(('172.17.0.1', 37377) -> ('172.31.17.33', 50828)) State.FROZEN -> State.IN_PROGRESS
+INFO:aioice.ice:Connection(3) Check CandidatePair(('172.31.17.33', 53537) -> ('5.28.189.89', 44407)) State.FROZEN -> State.IN_PROGRESS
+INFO:aioice.turn:TURN channel bound 16385 ('5.28.189.89', 44407)
+INFO:aioice.ice:Connection(3) Check CandidatePair(('172.31.17.33', 53537) -> ('172.31.17.33', 54595)) State.FROZEN -> State.IN_PROGRESS
+INFO:aioice.turn:TURN channel bound 16386 ('172.31.17.33', 54595)
+INFO:aioice.ice:Connection(3) Check CandidatePair(('172.31.17.33', 53537) -> ('172.31.17.33', 50828)) State.FROZEN -> State.IN_PROGRESS
+INFO:aioice.turn:TURN channel bound 16387 ('172.31.17.33', 50828)
+INFO:aioice.ice:Connection(3) Check CandidatePair(('172.31.17.33', 53537) -> ('172.31.17.33', 54595)) State.IN_PROGRESS -> State.SUCCEEDED
+INFO:aioice.ice:Connection(3) Check CandidatePair(('172.31.17.33', 53537) -> ('172.31.17.33', 50828)) State.IN_PROGRESS -> State.SUCCEEDED
+INFO:aioice.ice:Connection(3) Check CandidatePair(('2a00:a041:e48e:5d00:c7da:704e:5ff1:770d', 36638) -> ('2a01:73c0:94a:23dd:ee8:44a:2195:8196', 39460)) State.IN_PROGRESS -> State.SUCCEEDED
+INFO:aioice.ice:Connection(3) ICE completed
+INFO:remote_access:WebRTC connection state: connected
+INFO:remote_access:WebRTC connection state: closed
+INFO:aioice.turn:TURN allocation deleted ('172.31.17.33', 53537)
+INFO:remote_access:Remote WebRTC using TURN relay at turn:16.164.26.68:3478
+Remote WebRTC using TURN relay at turn:16.164.26.68:3478
+INFO:aioice.turn:TURN allocation created ('172.31.17.33', 57298) (expires in 600 seconds)
+INFO:remote_access:Sent WebRTC answer to viewer
+INFO:aioice.ice:Connection(4) Check CandidatePair(('2a00:a041:e48e:5d00:c7da:704e:5ff1:770d', 34104) -> ('2a01:73c0:94a:23dd:ee8:44a:2195:8196', 42982)) State.FROZEN -> State.WAITING
+INFO:aioice.ice:Connection(4) Check CandidatePair(('192.168.1.224', 47666) -> ('10.27.101.74', 49645)) State.FROZEN -> State.WAITING
+INFO:aioice.ice:Connection(4) Check CandidatePair(('172.17.0.1', 50753) -> ('10.27.101.74', 49645)) State.FROZEN -> State.WAITING
+INFO:aioice.ice:Connection(4) Check CandidatePair(('2a00:a041:e48e:5d00:c7da:704e:5ff1:770d', 34104) -> ('2a01:73c0:94a:23dd:ee8:44a:2195:8196', 42982)) State.FROZEN -> State.WAITING
+INFO:aioice.ice:Connection(4) Check CandidatePair(('172.31.17.33', 57298) -> ('10.27.101.74', 49645)) State.FROZEN -> State.WAITING
+INFO:remote_access:WebRTC connection state: connecting
+INFO:aioice.ice:Connection(4) Check CandidatePair(('2a00:a041:e48e:5d00:c7da:704e:5ff1:770d', 34104) -> ('2a01:73c0:94a:23dd:ee8:44a:2195:8196', 42982)) State.WAITING -> State.IN_PROGRESS
+INFO:aioice.ice:Connection(4) Check CandidatePair(('192.168.1.224', 47666) -> ('10.27.101.74', 49645)) State.WAITING -> State.IN_PROGRESS
+INFO:aioice.ice:Connection(4) Check CandidatePair(('172.17.0.1', 50753) -> ('10.27.101.74', 49645)) State.WAITING -> State.IN_PROGRESS
+INFO:aioice.ice:Connection(4) Check CandidatePair(('2a00:a041:e48e:5d00:c7da:704e:5ff1:770d', 34104) -> ('2a01:73c0:94a:23dd:ee8:44a:2195:8196', 42982)) State.WAITING -> State.IN_PROGRESS
+INFO:aioice.ice:Connection(4) Check CandidatePair(('172.31.17.33', 57298) -> ('10.27.101.74', 49645)) State.WAITING -> State.IN_PROGRESS
+INFO:aioice.turn:TURN channel bound 16384 ('10.27.101.74', 49645)
+INFO:aioice.ice:Connection(4) Check CandidatePair(('192.168.1.224', 47666) -> ('5.28.189.89', 44397)) State.FROZEN -> State.IN_PROGRESS
+INFO:aioice.ice:Connection(4) Check CandidatePair(('2a00:a041:e48e:5d00:c7da:704e:5ff1:770d', 34104) -> ('2a01:73c0:94a:23dd:ee8:44a:2195:8196', 42982)) State.IN_PROGRESS -> State.SUCCEEDED
+INFO:aioice.ice:Connection(4) Check CandidatePair(('172.17.0.1', 50753) -> ('5.28.189.89', 44397)) State.FROZEN -> State.IN_PROGRESS
+INFO:aioice.ice:Connection(4) Check CandidatePair(('192.168.1.224', 47666) -> ('172.31.17.33', 58066)) State.FROZEN -> State.IN_PROGRESS
+INFO:aioice.ice:Connection(4) Check CandidatePair(('172.17.0.1', 50753) -> ('172.31.17.33', 58066)) State.FROZEN -> State.IN_PROGRESS
+INFO:aioice.ice:Connection(4) Check CandidatePair(('192.168.1.224', 47666) -> ('172.31.17.33', 63149)) State.FROZEN -> State.IN_PROGRESS
+INFO:aioice.ice:Connection(4) Check CandidatePair(('172.17.0.1', 50753) -> ('172.31.17.33', 63149)) State.FROZEN -> State.IN_PROGRESS
+INFO:aioice.ice:Connection(4) Check CandidatePair(('172.31.17.33', 57298) -> ('5.28.189.89', 44397)) State.FROZEN -> State.IN_PROGRESS
+INFO:aioice.turn:TURN channel bound 16385 ('5.28.189.89', 44397)
+INFO:aioice.ice:Connection(4) Check CandidatePair(('172.31.17.33', 57298) -> ('172.31.17.33', 58066)) State.FROZEN -> State.IN_PROGRESS
+INFO:aioice.turn:TURN channel bound 16386 ('172.31.17.33', 58066)
+INFO:aioice.ice:Connection(4) Check CandidatePair(('172.31.17.33', 57298) -> ('172.31.17.33', 63149)) State.FROZEN -> State.IN_PROGRESS
+INFO:aioice.turn:TURN channel bound 16387 ('172.31.17.33', 63149)
+INFO:aioice.ice:Connection(4) Check CandidatePair(('172.31.17.33', 57298) -> ('172.31.17.33', 58066)) State.IN_PROGRESS -> State.SUCCEEDED
+INFO:aioice.ice:Connection(4) Check CandidatePair(('172.31.17.33', 57298) -> ('172.31.17.33', 63149)) State.IN_PROGRESS -> State.SUCCEEDED
+INFO:aioice.ice:Connection(4) Check CandidatePair(('2a00:a041:e48e:5d00:c7da:704e:5ff1:770d', 34104) -> ('2a01:73c0:94a:23dd:ee8:44a:2195:8196', 42982)) State.IN_PROGRESS -> State.SUCCEEDED
+INFO:aioice.ice:Connection(4) ICE completed
+INFO:remote_access:WebRTC connection state: closed
+INFO:aioice.turn:TURN allocation deleted ('172.31.17.33', 57298)
+INFO:remote_access:Remote WebRTC using TURN relay at turn:16.164.26.68:3478
+Remote WebRTC using TURN relay at turn:16.164.26.68:3478
+INFO:aioice.turn:TURN allocation created ('172.31.17.33', 53069) (expires in 600 seconds)
+INFO:remote_access:Sent WebRTC answer to viewer
+INFO:aioice.ice:Connection(5) Check CandidatePair(('2a00:a041:e48e:5d00:c7da:704e:5ff1:770d', 52580) -> ('2a01:73c0:94a:23dd:ee8:44a:2195:8196', 45440)) State.FROZEN -> State.WAITING
+INFO:aioice.ice:Connection(5) Check CandidatePair(('192.168.1.224', 48254) -> ('10.27.101.74', 38126)) State.FROZEN -> State.WAITING
+INFO:aioice.ice:Connection(5) Check CandidatePair(('172.17.0.1', 44381) -> ('10.27.101.74', 38126)) State.FROZEN -> State.WAITING
+INFO:aioice.ice:Connection(5) Check CandidatePair(('2a00:a041:e48e:5d00:c7da:704e:5ff1:770d', 52580) -> ('2a01:73c0:94a:23dd:ee8:44a:2195:8196', 45440)) State.FROZEN -> State.WAITING
+INFO:aioice.ice:Connection(5) Check CandidatePair(('172.31.17.33', 53069) -> ('10.27.101.74', 38126)) State.FROZEN -> State.WAITING
+INFO:remote_access:WebRTC connection state: connecting
+INFO:aioice.ice:Connection(5) Check CandidatePair(('2a00:a041:e48e:5d00:c7da:704e:5ff1:770d', 52580) -> ('2a01:73c0:94a:23dd:ee8:44a:2195:8196', 45440)) State.WAITING -> State.IN_PROGRESS
+INFO:aioice.ice:Connection(5) Check CandidatePair(('192.168.1.224', 48254) -> ('10.27.101.74', 38126)) State.WAITING -> State.IN_PROGRESS
+INFO:aioice.ice:Connection(5) Check CandidatePair(('172.17.0.1', 44381) -> ('10.27.101.74', 38126)) State.WAITING -> State.IN_PROGRESS
+INFO:aioice.ice:Connection(5) Check CandidatePair(('2a00:a041:e48e:5d00:c7da:704e:5ff1:770d', 52580) -> ('2a01:73c0:94a:23dd:ee8:44a:2195:8196', 45440)) State.WAITING -> State.IN_PROGRESS
+INFO:aioice.ice:Connection(5) Check CandidatePair(('172.31.17.33', 53069) -> ('10.27.101.74', 38126)) State.WAITING -> State.IN_PROGRESS
+INFO:aioice.turn:TURN channel bound 16384 ('10.27.101.74', 38126)
+INFO:aioice.ice:Connection(5) Check CandidatePair(('2a00:a041:e48e:5d00:c7da:704e:5ff1:770d', 52580) -> ('2a01:73c0:94a:23dd:ee8:44a:2195:8196', 45440)) State.IN_PROGRESS -> State.SUCCEEDED
+INFO:aioice.ice:Connection(5) Check CandidatePair(('192.168.1.224', 48254) -> ('5.28.189.89', 44398)) State.FROZEN -> State.IN_PROGRESS
+INFO:aioice.ice:Connection(5) Check CandidatePair(('172.17.0.1', 44381) -> ('5.28.189.89', 44398)) State.FROZEN -> State.IN_PROGRESS
+INFO:aioice.ice:Connection(5) Check CandidatePair(('192.168.1.224', 48254) -> ('172.31.17.33', 52148)) State.FROZEN -> State.IN_PROGRESS
+INFO:aioice.ice:Connection(5) Check CandidatePair(('172.17.0.1', 44381) -> ('172.31.17.33', 52148)) State.FROZEN -> State.IN_PROGRESS
+INFO:aioice.ice:Connection(5) Check CandidatePair(('192.168.1.224', 48254) -> ('172.31.17.33', 62480)) State.FROZEN -> State.IN_PROGRESS
+INFO:aioice.ice:Connection(5) Check CandidatePair(('172.17.0.1', 44381) -> ('172.31.17.33', 62480)) State.FROZEN -> State.IN_PROGRESS
+INFO:aioice.ice:Connection(5) Check CandidatePair(('172.31.17.33', 53069) -> ('5.28.189.89', 44398)) State.FROZEN -> State.IN_PROGRESS
+INFO:aioice.turn:TURN channel bound 16385 ('5.28.189.89', 44398)
+INFO:aioice.ice:Connection(5) Check CandidatePair(('172.31.17.33', 53069) -> ('172.31.17.33', 52148)) State.FROZEN -> State.IN_PROGRESS
+INFO:aioice.turn:TURN channel bound 16386 ('172.31.17.33', 52148)
+INFO:aioice.ice:Connection(5) Check CandidatePair(('172.31.17.33', 53069) -> ('172.31.17.33', 62480)) State.FROZEN -> State.IN_PROGRESS
+INFO:aioice.turn:TURN channel bound 16387 ('172.31.17.33', 62480)
+INFO:aioice.ice:Connection(5) Check CandidatePair(('172.31.17.33', 53069) -> ('172.31.17.33', 52148)) State.IN_PROGRESS -> State.SUCCEEDED
+INFO:aioice.ice:Connection(5) Check CandidatePair(('172.31.17.33', 53069) -> ('172.31.17.33', 62480)) State.IN_PROGRESS -> State.SUCCEEDED
+INFO:aioice.ice:Connection(5) Check CandidatePair(('2a00:a041:e48e:5d00:c7da:704e:5ff1:770d', 52580) -> ('2a01:73c0:94a:23dd:ee8:44a:2195:8196', 45440)) State.IN_PROGRESS -> State.SUCCEEDED
+INFO:aioice.ice:Connection(5) ICE completed
+INFO:remote_access:WebRTC connection state: connected
