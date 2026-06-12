@@ -60,7 +60,10 @@ def build_rtc_configuration() -> RTCConfiguration:
             "No TURN server configured; internet viewing may fail off the home Wi-Fi"
         )
         print("WARNING: No TURN server configured", flush=True)
-    return RTCConfiguration(iceServers=ice_servers)
+        return RTCConfiguration(
+            iceServers=ice_servers,
+            iceTransportPolicy="relay",
+        )
 
 
 class CameraStreamTrack(VideoStreamTrack):
