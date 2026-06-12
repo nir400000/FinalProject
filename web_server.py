@@ -267,6 +267,9 @@ def home():
     return '<h1>Baby Monitor</h1><img src="/video_feed" style="width:640px; height:480px;" />'
 
 if __name__ == '__main__':
+    import logging
+
+    logging.basicConfig(level=logging.INFO, format="%(levelname)s:%(name)s:%(message)s")
     try:
         try:
             from ble_wifi_provision import start_ble_provisioning_thread

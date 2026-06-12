@@ -37,18 +37,29 @@ def build_rtc_configuration() -> RTCConfiguration:
     cfg = get_device_config()
     turn_url = str(cfg.get("turn_url", "") or "").strip()
     if turn_url:
+        turn_urls = [turn_url]
+        if "transport=" not in turn_url:
+            host_port = turn_url.removeprefix("turn:").removeprefix("turns:")
+            turn_urls.extend(
+                [
+                    f"turn:{host_port}?transport=udp",
+                    f"turn:{host_port}?transport=tcp",
+                ]
+            )
         ice_servers.append(
             RTCIceServer(
-                urls=[turn_url],
+                urls=turn_urls,
                 username=str(cfg.get("turn_username", "") or ""),
                 credential=str(cfg.get("turn_password", "") or ""),
             )
         )
         logger.info("Remote WebRTC using TURN relay at %s", turn_url)
+        print(f"Remote WebRTC using TURN relay at {turn_url}", flush=True)
     else:
         logger.warning(
             "No TURN server configured; internet viewing may fail off the home Wi-Fi"
         )
+        print("WARNING: No TURN server configured", flush=True)
     return RTCConfiguration(iceServers=ice_servers)
 
 
@@ -112,12 +123,15 @@ class RemoteAccessService:
             self._ws = None
 
     async def _reset_peer(self) -> None:
-        if self._pc:
-            try:
-                await self._pc.close()
-            except Exception:
-                logger.exception("Failed to close peer connection")
-            self._pc = None
+        pc = self._pc
+        self._pc = None
+        if not pc:
+            return
+        try:
+            await pc.close()
+        except Exception:
+            logger.exception("Failed to close peer connection")
+        await asyncio.sleep(0.2)
 
     async def _safe_send(self, ws, payload: dict) -> bool:
         try:
@@ -137,6 +151,7 @@ class RemoteAccessService:
 
         while not self._stop.is_set():
             try:
+                print(f"Connecting to signaling server {url} ...", flush=True)
                 async with websockets.connect(url, ping_interval=20, ping_timeout=20) as ws:
                     self._ws = ws
                     await ws.send(
@@ -149,10 +164,14 @@ class RemoteAccessService:
                             }
                         )
                     )
-                    logger.info("Connected to signaling server as monitor %s", device_id)
+                    msg = f"Connected to signaling server as monitor {device_id}"
+                    logger.info(msg)
+                    print(msg, flush=True)
                     await self._listen(ws)
-            except Exception:
+            except Exception as exc:
                 logger.exception("Signaling connection failed; retrying in 10s")
+                print(f"Signaling connection failed ({exc}); retrying in 10s", flush=True)
+                await self._reset_peer()
                 await asyncio.sleep(10)
 
     async def _listen(self, ws) -> None:
@@ -223,7 +242,7 @@ class RemoteAccessService:
                 async def on_connectionstatechange():
                     state = pc.connectionState
                     logger.info("WebRTC connection state: %s", state)
-                    if state in ("failed", "closed"):
+                    if state == "failed":
                         await self._reset_peer()
 
                 self._pc = pc

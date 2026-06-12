@@ -2,6 +2,7 @@
 # Replace PUBLIC_IP and the user/password with values from device_config.json on the Pi.
 
 listening-port=3478
+listening-ip=0.0.0.0
 fingerprint
 lt-cred-mech
 realm=babymonitor
