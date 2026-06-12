@@ -37,6 +37,16 @@ python signaling_server.py --host 0.0.0.0 --port 8765
 
 Example URL: `ws://YOUR_AWS_PUBLIC_IP:8765`
 
+If port 8765 is already in use, stop the old process first:
+
+```bash
+sudo ss -tlnp | grep 8765
+# kill the PID shown, or: sudo fuser -k 8765/tcp
+python3 signaling_server.py --host 0.0.0.0 --port 8765
+```
+
+Run signaling under `systemd` or `screen` so it survives logout.
+
 ### 1b. TURN server (required for mobile data / remote Wi-Fi)
 
 ```bash
@@ -54,6 +64,19 @@ sudo systemctl start coturn
 |------|----------|---------|
 | 3478 | TCP + UDP | TURN |
 | 49160-49200 | UDP | TURN relay media |
+
+On EC2, set **both** public and private IP in coturn (replace with your values):
+
+```conf
+listening-ip=172.31.17.33
+external-ip=16.164.26.68/172.31.17.33
+```
+
+`ss` may still show `172.31.17.33:3478` — that is normal. Test with:
+
+```bash
+turnutils_uclient -v -u babymonitor -w YOUR_PASSWORD 16.164.26.68
+```
 
 Use the same username/password in `device_config.json` on the Pi (see below).
 
