@@ -1,18 +1,28 @@
-# Example coturn config for AWS (copy to /etc/turnserver.conf)
-# Replace PUBLIC_IP and the user/password with values from device_config.json on the Pi.
+# coturn config for AWS EC2 (copy to /etc/turnserver.conf)
+# Replace PUBLIC_IP with your EC2 elastic/public IP (e.g. 16.164.26.68).
+# user/password must match device_config.json on the Pi.
 
 listening-port=3478
 listening-ip=0.0.0.0
 fingerprint
 lt-cred-mech
 realm=babymonitor
+
+# CRITICAL: without external-ip, clients get relay addresses like 172.31.x.x
+# which do not work from mobile data / the public internet.
 external-ip=PUBLIC_IP
+
 user=babymonitor:YOUR_TURN_PASSWORD
 
-# Relay ports (open this UDP range in AWS security group)
+# Relay ports — open this UDP range in the AWS security group
 min-port=49160
 max-port=49200
 
 no-cli
 no-tls
 no-dtls
+
+# After editing:
+#   sudo systemctl restart coturn
+#   sudo ss -ulnp | grep 3478
+# You should see 0.0.0.0:3478 (not only 172.31.x.x)

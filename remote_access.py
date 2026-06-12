@@ -152,7 +152,12 @@ class RemoteAccessService:
         while not self._stop.is_set():
             try:
                 print(f"Connecting to signaling server {url} ...", flush=True)
-                async with websockets.connect(url, ping_interval=20, ping_timeout=20) as ws:
+                async with websockets.connect(
+                    url,
+                    ping_interval=30,
+                    ping_timeout=120,
+                    close_timeout=10,
+                ) as ws:
                     self._ws = ws
                     await ws.send(
                         json.dumps(

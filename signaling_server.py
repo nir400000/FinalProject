@@ -16,22 +16,22 @@ from __future__ import annotations
 
 import argparse
 import asyncio
+import contextlib
 import json
 import logging
 from typing import Dict, Optional
 
 import websockets
 from websockets.exceptions import ConnectionClosed
-from websockets.server import WebSocketServerProtocol
 
 logger = logging.getLogger(__name__)
 
-monitors: Dict[str, WebSocketServerProtocol] = {}
-viewers: Dict[str, WebSocketServerProtocol] = {}
+monitors: Dict[str, object] = {}
+viewers: Dict[str, object] = {}
 tokens: Dict[str, str] = {}
 
 
-async def send_json(ws: WebSocketServerProtocol, payload: dict) -> bool:
+async def send_json(ws, payload: dict) -> bool:
     try:
         await ws.send(json.dumps(payload))
         return True
@@ -39,7 +39,7 @@ async def send_json(ws: WebSocketServerProtocol, payload: dict) -> bool:
         return False
 
 
-def _remove_stale(role: str, device_id: str, ws: WebSocketServerProtocol) -> None:
+def _remove_stale(role: str, device_id: str, ws) -> None:
     if role == "monitor" and monitors.get(device_id) is ws:
         monitors.pop(device_id, None)
         tokens.pop(device_id, None)
@@ -59,9 +59,10 @@ async def relay_to_peer(device_id: str, from_role: str, payload: dict) -> None:
         _remove_stale(to_role, device_id, target)
 
 
-async def handler(ws: WebSocketServerProtocol) -> None:
+async def handler(ws) -> None:
     device_id: Optional[str] = None
     role: Optional[str] = None
+    remote = getattr(ws, "remote_address", None)
     try:
         async for raw in ws:
             try:
@@ -81,6 +82,10 @@ async def handler(ws: WebSocketServerProtocol) -> None:
                     continue
 
                 if role == "monitor":
+                    old = monitors.get(device_id)
+                    if old is not None and old is not ws:
+                        with contextlib.suppress(Exception):
+                            await old.close(1000, "replaced")
                     monitors[device_id] = ws
                     tokens[device_id] = token
                 else:
@@ -88,9 +93,14 @@ async def handler(ws: WebSocketServerProtocol) -> None:
                         await send_json(ws, {"type": "error", "message": "Invalid token"})
                         await ws.close()
                         return
+                    old = viewers.get(device_id)
+                    if old is not None and old is not ws:
+                        with contextlib.suppress(Exception):
+                            await old.close(1000, "replaced")
                     viewers[device_id] = ws
 
                 await send_json(ws, {"type": "registered", "role": role, "device_id": device_id})
+                logger.info("Registered %s for device %s (%s)", role, device_id, remote)
 
                 if role == "viewer" and device_id in monitors:
                     await send_json(ws, {"type": "monitor_online"})
@@ -110,8 +120,16 @@ async def handler(ws: WebSocketServerProtocol) -> None:
                 continue
 
             await send_json(ws, {"type": "error", "message": f"Unknown type: {msg_type}"})
-    except ConnectionClosed:
-        logger.info("Client disconnected (%s, device=%s)", role or "unknown", device_id or "?")
+    except ConnectionClosed as exc:
+        logger.info(
+            "Client disconnected (%s, device=%s, peer=%s): %s",
+            role or "unknown",
+            device_id or "?",
+            remote,
+            exc,
+        )
+    except Exception:
+        logger.exception("Signaling handler error (%s, device=%s)", role, device_id)
     finally:
         if device_id and role == "monitor" and monitors.get(device_id) is ws:
             monitors.pop(device_id, None)
@@ -121,7 +139,14 @@ async def handler(ws: WebSocketServerProtocol) -> None:
 
 
 async def main(host: str, port: int) -> None:
-    async with websockets.serve(handler, host, port, ping_interval=20, ping_timeout=20):
+    async with websockets.serve(
+        handler,
+        host,
+        port,
+        ping_interval=30,
+        ping_timeout=120,
+        close_timeout=10,
+    ):
         logger.info("Signaling server listening on ws://%s:%s", host, port)
         await asyncio.Future()
 
