@@ -1,15 +1,287 @@
-Failed to handle WebRTC signal (offer)
+(venv) nir@BabyMonitor:~/Desktop/server $ python web_server.py
+[1:00:27.335541044] [5465]  INFO Camera camera_manager.cpp:330 libcamera v0.5.2+99-bfd68f78
+[1:00:27.344900997] [5486]  INFO RPI pisp.cpp:720 libpisp version 1.3.0
+[1:00:27.347549282] [5486]  INFO IPAProxy ipa_proxy.cpp:180 Using tuning file /usr/share/libcamera/ipa/rpi/pisp/ov5647.json
+[1:00:27.358816536] [5486]  INFO Camera camera_manager.cpp:220 Adding camera '/base/axi/pcie@1000120000/rp1/i2c@88000/ov5647@36' for pipeline handler rpi/pisp
+[1:00:27.358866629] [5486]  INFO RPI pisp.cpp:1179 Registered camera /base/axi/pcie@1000120000/rp1/i2c@88000/ov5647@36 to CFE device /dev/media1 and ISP device /dev/media0 using PiSP variant BCM2712_C0
+[1:00:27.363124993] [5465]  INFO Camera camera.cpp:1215 configuring streams: (0) 640x480-XRGB8888/sRGB (1) 640x480-GBRG_PISP_COMP1/RAW
+[1:00:27.363373883] [5486]  INFO RPI pisp.cpp:1483 Sensor: /base/axi/pcie@1000120000/rp1/i2c@88000/ov5647@36 - Selected sensor format: 640x480-SGBRG10_1X10/RAW - Selected CFE format: 640x480-PC1g/RAW
+BLE Wi-Fi provisioning started (advertising as BabyMonitor)
+Advertisement registered
+Remote WebRTC access started (outbound signaling)
+ * Serving Flask app 'web_server'
+ * Debug mode: off
+WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5001
+ * Running on http://192.168.1.224:5001
+Press CTRL+C to quit
+
+Exception in callback Transaction.__retry()
+handle: <TimerHandle when=3856.703609003 Transaction.__retry()>
 Traceback (most recent call last):
-  File "/home/nir/Desktop/server/remote_access.py", line 169, in _handle_signal
-    pc = await self._ensure_peer(ws)
-         ^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/nir/Desktop/server/remote_access.py", line 141, in _ensure_peer
-    pc.addTrack(CameraStreamTrack())
-    ~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^
-  File "/home/nir/Desktop/server/venv/lib/python3.13/site-packages/aiortc/rtcpeerconnection.py", line 478, in addTrack
-    transceiver = self.__createTransceiver(
-        direction="sendrecv", kind=track.kind, sender_track=track
-    )
-  File "/home/nir/Desktop/server/venv/lib/python3.13/site-packages/aiortc/rtcpeerconnection.py", line 1163, in __createTransceiver
-    if self.__configuration.bundlePolicy == RTCBundlePolicy.MAX_BUNDLE:
-       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.13/asyncio/selector_events.py", line 1268, in sendto
+    self._sock.sendto(data, addr)
+    ^^^^^^^^^^^^^^^^^
+AttributeError: 'NoneType' object has no attribute 'sendto'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/usr/lib/python3.13/asyncio/events.py", line 89, in _run
+    self._context.run(self._callback, *self._args)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/nir/Desktop/server/venv/lib/python3.13/site-packages/aioice/stun.py", line 333, in __retry
+    self.__protocol.send_stun(self.__request, self.__addr)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/nir/Desktop/server/venv/lib/python3.13/site-packages/aioice/ice.py", line 327, in send_stun
+    self.transport.sendto(bytes(message), addr)
+    ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.13/asyncio/selector_events.py", line 1278, in sendto
+    self._fatal_error(
+    ~~~~~~~~~~~~~~~~~^
+        exc, 'Fatal write error on datagram transport')
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.13/asyncio/selector_events.py", line 880, in _fatal_error
+    self._loop.call_exception_handler({
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'NoneType' object has no attribute 'call_exception_handler'
+Exception in callback Transaction.__retry()
+handle: <TimerHandle when=3856.725043158 Transaction.__retry()>
+Traceback (most recent call last):
+  File "/usr/lib/python3.13/asyncio/selector_events.py", line 1268, in sendto
+    self._sock.sendto(data, addr)
+    ^^^^^^^^^^^^^^^^^
+AttributeError: 'NoneType' object has no attribute 'sendto'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/usr/lib/python3.13/asyncio/events.py", line 89, in _run
+    self._context.run(self._callback, *self._args)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/nir/Desktop/server/venv/lib/python3.13/site-packages/aioice/stun.py", line 333, in __retry
+    self.__protocol.send_stun(self.__request, self.__addr)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/nir/Desktop/server/venv/lib/python3.13/site-packages/aioice/ice.py", line 327, in send_stun
+    self.transport.sendto(bytes(message), addr)
+    ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.13/asyncio/selector_events.py", line 1278, in sendto
+    self._fatal_error(
+    ~~~~~~~~~~~~~~~~~^
+        exc, 'Fatal write error on datagram transport')
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.13/asyncio/selector_events.py", line 880, in _fatal_error
+    self._loop.call_exception_handler({
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'NoneType' object has no attribute 'call_exception_handler'
+Exception in callback Transaction.__retry()
+handle: <TimerHandle when=3856.74531703 Transaction.__retry()>
+Traceback (most recent call last):
+  File "/usr/lib/python3.13/asyncio/selector_events.py", line 1268, in sendto
+    self._sock.sendto(data, addr)
+    ^^^^^^^^^^^^^^^^^
+AttributeError: 'NoneType' object has no attribute 'sendto'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/usr/lib/python3.13/asyncio/events.py", line 89, in _run
+    self._context.run(self._callback, *self._args)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/nir/Desktop/server/venv/lib/python3.13/site-packages/aioice/stun.py", line 333, in __retry
+    self.__protocol.send_stun(self.__request, self.__addr)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/nir/Desktop/server/venv/lib/python3.13/site-packages/aioice/ice.py", line 327, in send_stun
+    self.transport.sendto(bytes(message), addr)
+    ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.13/asyncio/selector_events.py", line 1278, in sendto
+    self._fatal_error(
+    ~~~~~~~~~~~~~~~~~^
+        exc, 'Fatal write error on datagram transport')
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.13/asyncio/selector_events.py", line 880, in _fatal_error
+    self._loop.call_exception_handler({
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'NoneType' object has no attribute 'call_exception_handler'
+Exception in callback Transaction.__retry()
+handle: <TimerHandle when=3856.765939034 Transaction.__retry()>
+Traceback (most recent call last):
+  File "/usr/lib/python3.13/asyncio/selector_events.py", line 1268, in sendto
+    self._sock.sendto(data, addr)
+    ^^^^^^^^^^^^^^^^^
+AttributeError: 'NoneType' object has no attribute 'sendto'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/usr/lib/python3.13/asyncio/events.py", line 89, in _run
+    self._context.run(self._callback, *self._args)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/nir/Desktop/server/venv/lib/python3.13/site-packages/aioice/stun.py", line 333, in __retry
+    self.__protocol.send_stun(self.__request, self.__addr)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/nir/Desktop/server/venv/lib/python3.13/site-packages/aioice/ice.py", line 327, in send_stun
+    self.transport.sendto(bytes(message), addr)
+    ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.13/asyncio/selector_events.py", line 1278, in sendto
+    self._fatal_error(
+    ~~~~~~~~~~~~~~~~~^
+        exc, 'Fatal write error on datagram transport')
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.13/asyncio/selector_events.py", line 880, in _fatal_error
+    self._loop.call_exception_handler({
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'NoneType' object has no attribute 'call_exception_handler'
+Exception in callback Transaction.__retry()
+handle: <TimerHandle when=3857.559507857 Transaction.__retry()>
+Traceback (most recent call last):
+  File "/usr/lib/python3.13/asyncio/selector_events.py", line 1268, in sendto
+    self._sock.sendto(data, addr)
+    ^^^^^^^^^^^^^^^^^
+AttributeError: 'NoneType' object has no attribute 'sendto'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/usr/lib/python3.13/asyncio/events.py", line 89, in _run
+    self._context.run(self._callback, *self._args)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/nir/Desktop/server/venv/lib/python3.13/site-packages/aioice/stun.py", line 333, in __retry
+    self.__protocol.send_stun(self.__request, self.__addr)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/nir/Desktop/server/venv/lib/python3.13/site-packages/aioice/ice.py", line 327, in send_stun
+    self.transport.sendto(bytes(message), addr)
+    ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.13/asyncio/selector_events.py", line 1278, in sendto
+    self._fatal_error(
+    ~~~~~~~~~~~~~~~~~^
+        exc, 'Fatal write error on datagram transport')
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.13/asyncio/selector_events.py", line 880, in _fatal_error
+    self._loop.call_exception_handler({
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'NoneType' object has no attribute 'call_exception_handler'
+Exception in callback Transaction.__retry()
+handle: <TimerHandle when=3857.579761544 Transaction.__retry()>
+Traceback (most recent call last):
+  File "/usr/lib/python3.13/asyncio/selector_events.py", line 1268, in sendto
+    self._sock.sendto(data, addr)
+    ^^^^^^^^^^^^^^^^^
+AttributeError: 'NoneType' object has no attribute 'sendto'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/usr/lib/python3.13/asyncio/events.py", line 89, in _run
+    self._context.run(self._callback, *self._args)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/nir/Desktop/server/venv/lib/python3.13/site-packages/aioice/stun.py", line 333, in __retry
+    self.__protocol.send_stun(self.__request, self.__addr)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/nir/Desktop/server/venv/lib/python3.13/site-packages/aioice/ice.py", line 327, in send_stun
+    self.transport.sendto(bytes(message), addr)
+    ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.13/asyncio/selector_events.py", line 1278, in sendto
+    self._fatal_error(
+    ~~~~~~~~~~~~~~~~~^
+        exc, 'Fatal write error on datagram transport')
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.13/asyncio/selector_events.py", line 880, in _fatal_error
+    self._loop.call_exception_handler({
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'NoneType' object has no attribute 'call_exception_handler'
+Exception in callback Transaction.__retry()
+handle: <TimerHandle when=3857.601024457 Transaction.__retry()>
+Traceback (most recent call last):
+  File "/usr/lib/python3.13/asyncio/selector_events.py", line 1268, in sendto
+    self._sock.sendto(data, addr)
+    ^^^^^^^^^^^^^^^^^
+AttributeError: 'NoneType' object has no attribute 'sendto'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/usr/lib/python3.13/asyncio/events.py", line 89, in _run
+    self._context.run(self._callback, *self._args)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/nir/Desktop/server/venv/lib/python3.13/site-packages/aioice/stun.py", line 333, in __retry
+    self.__protocol.send_stun(self.__request, self.__addr)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/nir/Desktop/server/venv/lib/python3.13/site-packages/aioice/ice.py", line 327, in send_stun
+    self.transport.sendto(bytes(message), addr)
+    ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.13/asyncio/selector_events.py", line 1278, in sendto
+    self._fatal_error(
+    ~~~~~~~~~~~~~~~~~^
+        exc, 'Fatal write error on datagram transport')
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.13/asyncio/selector_events.py", line 880, in _fatal_error
+    self._loop.call_exception_handler({
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'NoneType' object has no attribute 'call_exception_handler'
+Exception in callback Transaction.__retry()
+handle: <TimerHandle when=3857.662687967 Transaction.__retry()>
+Traceback (most recent call last):
+  File "/usr/lib/python3.13/asyncio/selector_events.py", line 1268, in sendto
+    self._sock.sendto(data, addr)
+    ^^^^^^^^^^^^^^^^^
+AttributeError: 'NoneType' object has no attribute 'sendto'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/usr/lib/python3.13/asyncio/events.py", line 89, in _run
+    self._context.run(self._callback, *self._args)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/nir/Desktop/server/venv/lib/python3.13/site-packages/aioice/stun.py", line 333, in __retry
+    self.__protocol.send_stun(self.__request, self.__addr)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/nir/Desktop/server/venv/lib/python3.13/site-packages/aioice/ice.py", line 327, in send_stun
+    self.transport.sendto(bytes(message), addr)
+    ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.13/asyncio/selector_events.py", line 1278, in sendto
+    self._fatal_error(
+    ~~~~~~~~~~~~~~~~~^
+        exc, 'Fatal write error on datagram transport')
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.13/asyncio/selector_events.py", line 880, in _fatal_error
+    self._loop.call_exception_handler({
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'NoneType' object has no attribute 'call_exception_handler'
+Exception in callback Transaction.__retry()
+handle: <TimerHandle when=3857.683912806 Transaction.__retry()>
+Traceback (most recent call last):
+  File "/usr/lib/python3.13/asyncio/selector_events.py", line 1268, in sendto
+    self._sock.sendto(data, addr)
+    ^^^^^^^^^^^^^^^^^
+AttributeError: 'NoneType' object has no attribute 'sendto'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/usr/lib/python3.13/asyncio/events.py", line 89, in _run
+    self._context.run(self._callback, *self._args)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/nir/Desktop/server/venv/lib/python3.13/site-packages/aioice/stun.py", line 333, in __retry
+    self.__protocol.send_stun(self.__request, self.__addr)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/nir/Desktop/server/venv/lib/python3.13/site-packages/aioice/ice.py", line 327, in send_stun
+    self.transport.sendto(bytes(message), addr)
+    ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.13/asyncio/selector_events.py", line 1278, in sendto
+    self._fatal_error(
+    ~~~~~~~~~~~~~~~~~^
+        exc, 'Fatal write error on datagram transport')
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.13/asyncio/selector_events.py", line 880, in _fatal_error
+    self._loop.call_exception_handler({
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'NoneType' object has no attribute 'call_exception_handler'
+socket.send() raised exception.
+socket.send() raised exception.
+socket.send() raised exception.
+socket.send() raised exception.
+socket.send() raised exception.
+socket.send() raised exception.
+socket.send() raised exception.
