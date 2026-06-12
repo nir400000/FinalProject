@@ -119,6 +119,14 @@ class RemoteAccessService:
                 logger.exception("Failed to close peer connection")
             self._pc = None
 
+    async def _safe_send(self, ws, payload: dict) -> bool:
+        try:
+            await ws.send(json.dumps(payload))
+            return True
+        except Exception:
+            logger.warning("Could not send WebRTC signal (viewer disconnected?)")
+            return False
+
     async def _main(self) -> None:
         import websockets
 
@@ -198,36 +206,41 @@ class RemoteAccessService:
                 async def on_icecandidate(candidate):
                     if candidate is None:
                         return
-                    await ws.send(
-                        json.dumps(
-                            {
-                                "type": "signal",
-                                "payload": {
-                                    "kind": "ice",
-                                    "candidate": candidate.candidate,
-                                    "sdpMid": candidate.sdpMid,
-                                    "sdpMLineIndex": candidate.sdpMLineIndex,
-                                },
-                            }
-                        )
+                    await self._safe_send(
+                        ws,
+                        {
+                            "type": "signal",
+                            "payload": {
+                                "kind": "ice",
+                                "candidate": candidate.candidate,
+                                "sdpMid": candidate.sdpMid,
+                                "sdpMLineIndex": candidate.sdpMLineIndex,
+                            },
+                        },
                     )
+
+                @pc.on("connectionstatechange")
+                async def on_connectionstatechange():
+                    state = pc.connectionState
+                    logger.info("WebRTC connection state: %s", state)
+                    if state in ("failed", "closed"):
+                        await self._reset_peer()
 
                 self._pc = pc
                 offer = RTCSessionDescription(sdp=payload["sdp"], type=payload["type"])
                 await pc.setRemoteDescription(offer)
                 answer = await pc.createAnswer()
                 await pc.setLocalDescription(answer)
-                await ws.send(
-                    json.dumps(
-                        {
-                            "type": "signal",
-                            "payload": {
-                                "kind": "answer",
-                                "type": pc.localDescription.type,
-                                "sdp": pc.localDescription.sdp,
-                            },
-                        }
-                    )
+                await self._safe_send(
+                    ws,
+                    {
+                        "type": "signal",
+                        "payload": {
+                            "kind": "answer",
+                            "type": pc.localDescription.type,
+                            "sdp": pc.localDescription.sdp,
+                        },
+                    },
                 )
                 logger.info("Sent WebRTC answer to viewer")
             elif kind == "ice" and self._pc:
