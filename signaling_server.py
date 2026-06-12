@@ -16,7 +16,6 @@ from __future__ import annotations
 
 import argparse
 import asyncio
-import contextlib
 import json
 import logging
 from typing import Dict, Optional
@@ -82,10 +81,6 @@ async def handler(ws) -> None:
                     continue
 
                 if role == "monitor":
-                    old = monitors.get(device_id)
-                    if old is not None and old is not ws:
-                        with contextlib.suppress(Exception):
-                            await old.close(1000, "replaced")
                     monitors[device_id] = ws
                     tokens[device_id] = token
                 else:
@@ -93,10 +88,6 @@ async def handler(ws) -> None:
                         await send_json(ws, {"type": "error", "message": "Invalid token"})
                         await ws.close()
                         return
-                    old = viewers.get(device_id)
-                    if old is not None and old is not ws:
-                        with contextlib.suppress(Exception):
-                            await old.close(1000, "replaced")
                     viewers[device_id] = ws
 
                 await send_json(ws, {"type": "registered", "role": role, "device_id": device_id})
