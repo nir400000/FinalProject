@@ -1,19 +1,13 @@
-"""Persistent device identity and remote-access credentials for the monitor."""
+"""Persistent device identity and Tailscale remote-access settings for the monitor."""
 
 from __future__ import annotations
 
 import json
-import os
-import secrets
-import uuid
+import subprocess
 from pathlib import Path
 from typing import Dict
 
 CONFIG_PATH = Path(__file__).resolve().parent / "device_config.json"
-DEFAULT_SIGNALING_URL = os.environ.get("BABYMONITOR_SIGNALING_URL", "").strip()
-DEFAULT_TURN_URL = os.environ.get("BABYMONITOR_TURN_URL", "").strip()
-DEFAULT_TURN_USERNAME = os.environ.get("BABYMONITOR_TURN_USERNAME", "babymonitor").strip()
-DEFAULT_TURN_PASSWORD = os.environ.get("BABYMONITOR_TURN_PASSWORD", "").strip()
 
 
 def _load() -> Dict:
@@ -29,27 +23,34 @@ def _save(data: Dict) -> None:
     CONFIG_PATH.write_text(json.dumps(data, indent=2), encoding="utf-8")
 
 
+def get_tailscale_ip() -> str:
+    data = _load()
+    configured = str(data.get("tailscale_ip", "") or "").strip()
+    if configured:
+        return configured
+    try:
+        result = subprocess.run(
+            ["tailscale", "ip", "-4"],
+            capture_output=True,
+            text=True,
+            timeout=5,
+            check=False,
+        )
+        if result.returncode == 0:
+            return result.stdout.strip()
+    except (FileNotFoundError, OSError, subprocess.SubprocessError):
+        pass
+    return ""
+
+
 def get_device_config() -> Dict:
     data = _load()
     changed = False
-    if not data.get("device_id"):
-        data["device_id"] = str(uuid.uuid4())
-        changed = True
-    if not data.get("access_token"):
-        data["access_token"] = secrets.token_urlsafe(32)
-        changed = True
-    if not str(data.get("signaling_url", "") or "").strip() and DEFAULT_SIGNALING_URL:
-        data["signaling_url"] = DEFAULT_SIGNALING_URL
-        changed = True
-    if not data.get("turn_url") and DEFAULT_TURN_URL:
-        data["turn_url"] = DEFAULT_TURN_URL
-        changed = True
-    if not data.get("turn_username"):
-        data["turn_username"] = DEFAULT_TURN_USERNAME or "babymonitor"
-        changed = True
-    if not data.get("turn_password"):
-        data["turn_password"] = DEFAULT_TURN_PASSWORD or secrets.token_urlsafe(16)
-        changed = True
+    tailscale_ip = get_tailscale_ip()
+    if tailscale_ip and data.get("tailscale_ip") != tailscale_ip:
+        if not str(data.get("tailscale_ip", "") or "").strip():
+            data["tailscale_ip"] = tailscale_ip
+            changed = True
     if changed:
         _save(data)
     return data
@@ -57,19 +58,5 @@ def get_device_config() -> Dict:
 
 def get_remote_info_json() -> str:
     cfg = get_device_config()
-    return json.dumps(
-        {
-            "device_id": cfg["device_id"],
-            "access_token": cfg["access_token"],
-            "signaling_url": cfg.get("signaling_url", ""),
-            "turn_url": cfg.get("turn_url", ""),
-            "turn_username": cfg.get("turn_username", ""),
-            "turn_password": cfg.get("turn_password", ""),
-        }
-    )
-
-
-def set_signaling_url(url: str) -> None:
-    data = get_device_config()
-    data["signaling_url"] = url.strip()
-    _save(data)
+    tailscale_ip = str(cfg.get("tailscale_ip", "") or "").strip() or get_tailscale_ip()
+    return json.dumps({"tailscale_ip": tailscale_ip})
