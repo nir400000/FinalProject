@@ -1,4 +1,4 @@
-"""Thread-safe latest camera frame for local MJPEG and WebRTC."""
+"""Thread-safe latest camera frame for MJPEG streaming."""
 
 from __future__ import annotations
 

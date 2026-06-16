@@ -1,4 +1,4 @@
-"""Persistent device identity and Tailscale remote-access settings for the monitor."""
+"""Persistent monitor settings for internet viewing over the private network."""
 
 from __future__ import annotations
 

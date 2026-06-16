@@ -278,13 +278,6 @@ if __name__ == '__main__':
         except Exception as ble_exc:
             print(f'BLE Wi-Fi provisioning not available: {ble_exc}')
 
-        try:
-            from remote_access import start_remote_access_thread
-            start_remote_access_thread()
-            print('Remote WebRTC access started (outbound signaling)')
-        except Exception as remote_exc:
-            print(f'Remote WebRTC not available: {remote_exc}')
-
         # Threaded=True is important for Flask with Video Streaming
         app.run(host='0.0.0.0', port=5001, threaded=True)
     finally:
