@@ -264,7 +264,7 @@ def remote_info():
 
 @app.route('/servo', methods=['GET', 'POST'])
 def servo_control():
-    from servo_controller import get_status, init_servos, set_angles
+    from servo_controller import get_status, init_servos, set_angles, step_angles
 
     if request.method == 'GET':
         init_servos()
@@ -272,7 +272,13 @@ def servo_control():
 
     data = request.get_json(force=True, silent=True) or {}
     try:
-        result = set_angles(data.get('pan', 0), data.get('tilt', 0))
+        if 'pan_delta' in data or 'tilt_delta' in data:
+            result = step_angles(
+                data.get('pan_delta', 0),
+                data.get('tilt_delta', 0),
+            )
+        else:
+            result = set_angles(data.get('pan', 0), data.get('tilt', 0))
         return jsonify({"ok": True, **result})
     except RuntimeError as exc:
         return jsonify({"ok": False, "error": str(exc)}), 503

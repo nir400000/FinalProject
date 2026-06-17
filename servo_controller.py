@@ -10,6 +10,7 @@ logger = logging.getLogger(__name__)
 
 MIN_ANGLE = -90
 MAX_ANGLE = 90
+STEP_DEG = 5
 MIN_DUTY = 2.5
 MAX_DUTY = 12.0
 
@@ -67,6 +68,24 @@ def set_angles(pan: float, tilt: float) -> Dict[str, float]:
     return {"pan": pan, "tilt": tilt}
 
 
+def step_angles(pan_delta: float = 0, tilt_delta: float = 0) -> Dict[str, float]:
+    """Move servos relative to current position (same steps as servo_control_pi5.py keys)."""
+    global _pan_angle, _tilt_angle
+
+    with _lock:
+        if not init_servos():
+            raise RuntimeError("Servo hardware not available")
+
+        if pan_delta:
+            _pan_angle = max(MIN_ANGLE, min(MAX_ANGLE, _pan_angle + float(pan_delta)))
+            _pan_servo.change_duty_cycle(angle_to_duty_cycle(_pan_angle))
+        if tilt_delta:
+            _tilt_angle = max(MIN_ANGLE, min(MAX_ANGLE, _tilt_angle + float(tilt_delta)))
+            _tilt_servo.change_duty_cycle(angle_to_duty_cycle(_tilt_angle))
+
+    return {"pan": _pan_angle, "tilt": _tilt_angle}
+
+
 def get_status() -> Dict:
     with _lock:
         return {
@@ -75,6 +94,7 @@ def get_status() -> Dict:
             "tilt": _tilt_angle,
             "min": MIN_ANGLE,
             "max": MAX_ANGLE,
+            "step": STEP_DEG,
         }
 
 
