@@ -1,4 +1,4 @@
-from flask import Flask, Response, jsonify
+from flask import Flask, Response, jsonify, request
 from frame_buffer import update_frame
 from sleep_tracker import get_sleep_tracker, STATE_AWAKE, STATE_OUT, STATE_SLEEPING
 import cv2
@@ -262,6 +262,24 @@ def remote_info():
     return get_remote_info_json(), 200, {"Content-Type": "application/json"}
 
 
+@app.route('/servo', methods=['GET', 'POST'])
+def servo_control():
+    from servo_controller import get_status, init_servos, set_angles
+
+    if request.method == 'GET':
+        init_servos()
+        return jsonify(get_status())
+
+    data = request.get_json(force=True, silent=True) or {}
+    try:
+        result = set_angles(data.get('pan', 0), data.get('tilt', 0))
+        return jsonify({"ok": True, **result})
+    except RuntimeError as exc:
+        return jsonify({"ok": False, "error": str(exc)}), 503
+    except (TypeError, ValueError) as exc:
+        return jsonify({"ok": False, "error": str(exc)}), 400
+
+
 @app.route('/')
 def home():
     return '<h1>Baby Monitor</h1><img src="/video_feed" style="width:640px; height:480px;" />'
@@ -284,3 +302,8 @@ if __name__ == '__main__':
         _inference_state['stop_event'].set()
         if _inference_state['worker']:
             _inference_state['worker'].join(timeout=1.0)
+        try:
+            from servo_controller import shutdown_servos
+            shutdown_servos()
+        except Exception:
+            pass
