@@ -7,9 +7,9 @@ import logging
 import os
 import queue
 import re
-import struct
 import subprocess
 import threading
+import time
 from pathlib import Path
 from typing import Iterator
 
@@ -33,7 +33,6 @@ def _load_config() -> dict:
 
 
 def detect_capture_device() -> str:
-    """Resolve ALSA capture device for the USB microphone."""
     env = os.environ.get("BABYMONITOR_AUDIO_DEVICE", "").strip()
     if env:
         return env
@@ -79,7 +78,7 @@ def get_audio_info() -> dict:
     return {
         "sample_rate": SAMPLE_RATE,
         "channels": CHANNELS,
-        "format": "WAV/PCM S16_LE",
+        "format": "S16_LE",
         "device": get_capture_device(),
         "url_path": "/audio_feed",
     }
@@ -105,41 +104,18 @@ def _arecord_command(device: str) -> list[str]:
     ]
 
 
-def _create_wav_header(sample_rate: int, channels: int) -> bytes:
-    """44-byte WAV header for a continuous HTTP stream."""
-    bits_per_sample = 16
-    byte_rate = sample_rate * channels * (bits_per_sample // 8)
-    block_align = channels * (bits_per_sample // 8)
-    return struct.pack(
-        "<4sI4s4sIHHIIHH4sI",
-        b"RIFF",
-        0x7FFFFFFF,
-        b"WAVE",
-        b"fmt ",
-        16,
-        1,
-        channels,
-        sample_rate,
-        byte_rate,
-        block_align,
-        bits_per_sample,
-        b"data",
-        0x7FFFFFFF,
-    )
-
-
 class AudioCaptureHub:
-    """Single arecord process shared by all /audio_feed clients."""
+    """One arecord process shared by all listeners; keeps running while server is up."""
 
     _instance: "AudioCaptureHub | None" = None
     _instance_lock = threading.Lock()
 
     def __init__(self) -> None:
         self._hub_lock = threading.Lock()
-        self._subscribers: list[queue.Queue[bytes | None]] = []
+        self._subscribers: list[queue.Queue[bytes]] = []
         self._proc: subprocess.Popen | None = None
         self._reader_thread: threading.Thread | None = None
-        self._running = False
+        self._active = False
 
     @classmethod
     def get(cls) -> "AudioCaptureHub":
@@ -148,125 +124,127 @@ class AudioCaptureHub:
                 cls._instance = cls()
             return cls._instance
 
-    def subscribe(self) -> queue.Queue[bytes | None]:
-        subscriber: queue.Queue[bytes | None] = queue.Queue(maxsize=48)
+    def ensure_running(self) -> None:
+        with self._hub_lock:
+            if self._active:
+                return
+            self._active = True
+            self._reader_thread = threading.Thread(
+                target=self._capture_loop,
+                name="audio-capture",
+                daemon=True,
+            )
+            self._reader_thread.start()
+            logger.info("Audio capture hub started")
+
+    def subscribe(self) -> queue.Queue[bytes]:
+        self.ensure_running()
+        subscriber: queue.Queue[bytes] = queue.Queue(maxsize=64)
         with self._hub_lock:
             self._subscribers.append(subscriber)
-            if not self._running:
-                self._start_capture()
         return subscriber
 
-    def unsubscribe(self, subscriber: queue.Queue[bytes | None]) -> None:
+    def unsubscribe(self, subscriber: queue.Queue[bytes]) -> None:
         with self._hub_lock:
             if subscriber in self._subscribers:
                 self._subscribers.remove(subscriber)
-            if not self._subscribers:
-                self._stop_capture()
 
-    def _start_capture(self) -> None:
-        if self._running:
-            return
+    def shutdown(self) -> None:
+        with self._hub_lock:
+            self._active = False
+            self._kill_proc()
+            logger.info("Audio capture hub stopped")
 
+    def _capture_loop(self) -> None:
+        while True:
+            with self._hub_lock:
+                if not self._active:
+                    break
+                proc = self._open_proc()
+                if proc is None:
+                    time.sleep(1.0)
+                    continue
+
+            assert proc.stdout is not None
+            try:
+                while self._active:
+                    chunk = proc.stdout.read(CHUNK_SIZE)
+                    if not chunk:
+                        stderr = ""
+                        if proc.stderr is not None:
+                            stderr = proc.stderr.read().decode("utf-8", errors="ignore").strip()
+                        logger.warning("Microphone capture ended: %s", stderr or "no data")
+                        break
+                    with self._hub_lock:
+                        subscribers = list(self._subscribers)
+                    for subscriber in subscribers:
+                        try:
+                            subscriber.put_nowait(chunk)
+                        except queue.Full:
+                            try:
+                                subscriber.get_nowait()
+                            except queue.Empty:
+                                pass
+                            try:
+                                subscriber.put_nowait(chunk)
+                            except queue.Full:
+                                pass
+            finally:
+                with self._hub_lock:
+                    self._kill_proc()
+
+            if not self._active:
+                break
+            time.sleep(0.5)
+
+    def _open_proc(self) -> subprocess.Popen | None:
         device = get_capture_device()
-        cmd = _arecord_command(device)
         try:
             self._proc = subprocess.Popen(
-                cmd,
+                _arecord_command(device),
                 stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE,
                 bufsize=0,
             )
+            logger.info(
+                "Audio capture started (device=%s, rate=%s, channels=%s)",
+                device,
+                SAMPLE_RATE,
+                CHANNELS,
+            )
+            return self._proc
         except OSError as exc:
             logger.error("Failed to start arecord: %s", exc)
-            raise RuntimeError(str(exc)) from exc
+            self._proc = None
+            return None
 
-        self._running = True
-        self._reader_thread = threading.Thread(
-            target=self._read_loop,
-            name="audio-capture",
-            daemon=True,
-        )
-        self._reader_thread.start()
-        logger.info(
-            "Audio capture started (device=%s, rate=%s, channels=%s)",
-            device,
-            SAMPLE_RATE,
-            CHANNELS,
-        )
-
-    def _read_loop(self) -> None:
-        assert self._proc is not None and self._proc.stdout is not None
-
-        try:
-            while self._running:
-                chunk = self._proc.stdout.read(CHUNK_SIZE)
-                if not chunk:
-                    stderr = ""
-                    if self._proc.stderr is not None:
-                        stderr = self._proc.stderr.read().decode("utf-8", errors="ignore").strip()
-                    logger.warning("Microphone capture ended: %s", stderr or "no data")
-                    break
-
-                with self._hub_lock:
-                    subscribers = list(self._subscribers)
-                for subscriber in subscribers:
-                    try:
-                        subscriber.put_nowait(chunk)
-                    except queue.Full:
-                        try:
-                            subscriber.get_nowait()
-                        except queue.Empty:
-                            pass
-                        try:
-                            subscriber.put_nowait(chunk)
-                        except queue.Full:
-                            pass
-        finally:
-            with self._hub_lock:
-                self._notify_end()
-                self._cleanup_process()
-
-    def _notify_end(self) -> None:
-        with self._hub_lock:
-            for subscriber in self._subscribers:
-                try:
-                    subscriber.put_nowait(None)
-                except queue.Full:
-                    try:
-                        subscriber.get_nowait()
-                        subscriber.put_nowait(None)
-                    except queue.Empty:
-                        pass
-
-    def _stop_capture(self) -> None:
-        self._running = False
+    def _kill_proc(self) -> None:
         proc = self._proc
-        if proc is not None and proc.poll() is None:
-            proc.terminate()
-            try:
-                proc.wait(timeout=2)
-            except subprocess.TimeoutExpired:
-                proc.kill()
-                proc.wait(timeout=1)
-        self._cleanup_process()
-        logger.info("Audio capture stopped")
-
-    def _cleanup_process(self) -> None:
         self._proc = None
-        self._reader_thread = None
-        self._running = False
+        if proc is None or proc.poll() is not None:
+            return
+        proc.terminate()
+        try:
+            proc.wait(timeout=2)
+        except subprocess.TimeoutExpired:
+            proc.kill()
+            proc.wait(timeout=1)
 
 
 def generate_audio_stream() -> Iterator[bytes]:
-    """Yield WAV header then live PCM from the shared microphone capture."""
     hub = AudioCaptureHub.get()
     subscriber = hub.subscribe()
-    yield _create_wav_header(SAMPLE_RATE, CHANNELS)
     try:
         while True:
             chunk = subscriber.get()
-            if chunk is None:
-                break
             yield chunk
     finally:
         hub.unsubscribe(subscriber)
+
+
+def start_capture_hub() -> None:
+    AudioCaptureHub.get().ensure_running()
+
+
+def shutdown_capture_hub() -> None:
+    AudioCaptureHub.get().shutdown()

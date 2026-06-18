@@ -271,12 +271,12 @@ def audio_info():
 
 @app.route('/audio_feed')
 def audio_feed():
-    from audio_stream import generate_audio_stream
+    from audio_stream import SAMPLE_RATE, generate_audio_stream
 
     try:
         return Response(
             generate_audio_stream(),
-            mimetype="audio/wav",
+            mimetype=f"audio/L16; rate={SAMPLE_RATE}; channels=1",
         )
     except Exception as exc:
         return jsonify({"ok": False, "error": str(exc)}), 503
@@ -322,6 +322,13 @@ if __name__ == '__main__':
         except Exception as ble_exc:
             print(f'BLE Wi-Fi provisioning not available: {ble_exc}')
 
+        try:
+            from audio_stream import start_capture_hub, shutdown_capture_hub
+            start_capture_hub()
+            print('Nursery microphone capture started')
+        except Exception as audio_exc:
+            print(f'Nursery microphone not available: {audio_exc}')
+
         # Threaded=True is important for Flask with Video Streaming
         app.run(host='0.0.0.0', port=5001, threaded=True)
     finally:
@@ -331,5 +338,10 @@ if __name__ == '__main__':
         try:
             from servo_controller import shutdown_servos
             shutdown_servos()
+        except Exception:
+            pass
+        try:
+            from audio_stream import shutdown_capture_hub
+            shutdown_capture_hub()
         except Exception:
             pass
