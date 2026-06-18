@@ -1,25 +1,143 @@
-nir@BabyMonitor:~ $ arecord -l
-**** List of CAPTURE Hardware Devices ****
-card 2: Device [USB PnP Sound Device], device 0: USB Audio [USB Audio]
-  Subdevices: 1/1
-  Subdevice #0: subdevice #0
-nir@BabyMonitor:~ $ arecord -D plughw:1,0 -f S16_LE -r 16000 -c 1 -d 3 test.wav
-arecord: main:850: audio open error: No such file or directory
-nir@BabyMonitor:~ $ lsusb
-Bus 001 Device 001: ID 1d6b:0002 Linux Foundation 2.0 root hub
-Bus 001 Device 002: ID 08bb:2902 Texas Instruments PCM2902 Audio Codec
-Bus 002 Device 001: ID 1d6b:0003 Linux Foundation 3.0 root hub
-Bus 003 Device 001: ID 1d6b:0002 Linux Foundation 2.0 root hub
-Bus 003 Device 002: ID 1c4f:0048 SiGma Micro USB Mouse
-Bus 003 Device 003: ID 046d:c52b Logitech, Inc. Unifying Receiver
-Bus 004 Device 001: ID 1d6b:0003 Linux Foundation 3.0 root hub
-nir@BabyMonitor:~ $ arecord -D plughw:2,0 -f S16_LE -r 16000 -c 1 -d 3 test.wav
-Recording WAVE 'test.wav' : Signed 16 bit Little Endian, Rate 16000 Hz, Mono
-nir@BabyMonitor:~ $ aplay test.wav
-aplay: main:850: audio open error: Unknown error 524
-nir@BabyMonitor:~ $ arecord -D default -f S16_LE -r 16000 -c 2 -d 3 test.wav
-ALSA lib pcm_asym.c:105:(_snd_pcm_asym_open) capture slave is not defined
-arecord: main:850: audio open error: Invalid argument
-nir@BabyMonitor:~ $ arecord -D 2 -f S16_LE -r 16000 -c 1 -d 3 test.wav
-ALSA lib pcm.c:2722:(snd_pcm_open_noupdate) Unknown PCM 2
-arecord: main:850: audio open error: No such file or directory
+INFO:audio_stream:Using microphone device: plughw:2,0
+INFO:audio_stream:Audio stream started (device=plughw:2,0, rate=16000, channels=1)
+INFO:audio_stream:Audio stream started (device=plughw:2,0, rate=16000, channels=1)
+INFO:audio_stream:Audio stream stopped
+INFO:werkzeug:192.168.1.106 - - [18/Jun/2026 23:23:48] "GET /audio_feed HTTP/1.1" 500 -
+ERROR:werkzeug:Error on request:
+Traceback (most recent call last):
+  File "/usr/lib/python3/dist-packages/werkzeug/serving.py", line 370, in run_wsgi
+    execute(self.server.app)
+    ~~~~~~~^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3/dist-packages/werkzeug/serving.py", line 333, in execute
+    for data in application_iter:
+                ^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3/dist-packages/werkzeug/wsgi.py", line 256, in __next__
+    return self._next()
+           ~~~~~~~~~~^^
+  File "/usr/lib/python3/dist-packages/werkzeug/wrappers/response.py", line 32, in _iter_encoded
+    for item in iterable:
+                ^^^^^^^^
+  File "/home/nir/Desktop/server/audio_stream.py", line 129, in generate_audio_stream
+    raise RuntimeError(stderr or "Microphone stream ended unexpectedly")
+RuntimeError: arecord: main:850: audio open error: Device or resource busy
+INFO:werkzeug:192.168.1.106 - - [18/Jun/2026 23:23:48] "GET /audio_feed HTTP/1.1" 200 -
+INFO:audio_stream:Audio stream started (device=plughw:2,0, rate=16000, channels=1)
+INFO:audio_stream:Audio stream stopped
+INFO:werkzeug:192.168.1.106 - - [18/Jun/2026 23:23:49] "GET /audio_feed HTTP/1.1" 500 -
+ERROR:werkzeug:Error on request:
+Traceback (most recent call last):
+  File "/usr/lib/python3/dist-packages/werkzeug/serving.py", line 370, in run_wsgi
+    execute(self.server.app)
+    ~~~~~~~^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3/dist-packages/werkzeug/serving.py", line 333, in execute
+    for data in application_iter:
+                ^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3/dist-packages/werkzeug/wsgi.py", line 256, in __next__
+    return self._next()
+           ~~~~~~~~~~^^
+  File "/usr/lib/python3/dist-packages/werkzeug/wrappers/response.py", line 32, in _iter_encoded
+    for item in iterable:
+                ^^^^^^^^
+  File "/home/nir/Desktop/server/audio_stream.py", line 129, in generate_audio_stream
+    raise RuntimeError(stderr or "Microphone stream ended unexpectedly")
+RuntimeError: arecord: main:850: audio open error: Device or resource busy
+INFO:audio_stream:Audio stream started (device=plughw:2,0, rate=16000, channels=1)
+INFO:audio_stream:Audio stream stopped
+INFO:werkzeug:192.168.1.106 - - [18/Jun/2026 23:23:51] "GET /audio_feed HTTP/1.1" 500 -
+ERROR:werkzeug:Error on request:
+Traceback (most recent call last):
+  File "/usr/lib/python3/dist-packages/werkzeug/serving.py", line 370, in run_wsgi
+    execute(self.server.app)
+    ~~~~~~~^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3/dist-packages/werkzeug/serving.py", line 333, in execute
+    for data in application_iter:
+                ^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3/dist-packages/werkzeug/wsgi.py", line 256, in __next__
+    return self._next()
+           ~~~~~~~~~~^^
+  File "/usr/lib/python3/dist-packages/werkzeug/wrappers/response.py", line 32, in _iter_encoded
+    for item in iterable:
+                ^^^^^^^^
+  File "/home/nir/Desktop/server/audio_stream.py", line 129, in generate_audio_stream
+    raise RuntimeError(stderr or "Microphone stream ended unexpectedly")
+RuntimeError: arecord: main:850: audio open error: Device or resource busy
+INFO:audio_stream:Audio stream started (device=plughw:2,0, rate=16000, channels=1)
+INFO:audio_stream:Audio stream stopped
+INFO:werkzeug:192.168.1.106 - - [18/Jun/2026 23:23:52] "GET /audio_feed HTTP/1.1" 500 -
+ERROR:werkzeug:Error on request:
+Traceback (most recent call last):
+  File "/usr/lib/python3/dist-packages/werkzeug/serving.py", line 370, in run_wsgi
+    execute(self.server.app)
+    ~~~~~~~^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3/dist-packages/werkzeug/serving.py", line 333, in execute
+    for data in application_iter:
+                ^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3/dist-packages/werkzeug/wsgi.py", line 256, in __next__
+    return self._next()
+           ~~~~~~~~~~^^
+  File "/usr/lib/python3/dist-packages/werkzeug/wrappers/response.py", line 32, in _iter_encoded
+    for item in iterable:
+                ^^^^^^^^
+  File "/home/nir/Desktop/server/audio_stream.py", line 129, in generate_audio_stream
+    raise RuntimeError(stderr or "Microphone stream ended unexpectedly")
+RuntimeError: Microphone stream ended unexpectedly
+INFO:audio_stream:Audio stream started (device=plughw:2,0, rate=16000, channels=1)
+INFO:audio_stream:Audio stream stopped
+INFO:werkzeug:192.168.1.106 - - [18/Jun/2026 23:23:54] "GET /audio_feed HTTP/1.1" 500 -
+ERROR:werkzeug:Error on request:
+Traceback (most recent call last):
+  File "/usr/lib/python3/dist-packages/werkzeug/serving.py", line 370, in run_wsgi
+    execute(self.server.app)
+    ~~~~~~~^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3/dist-packages/werkzeug/serving.py", line 333, in execute
+    for data in application_iter:
+                ^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3/dist-packages/werkzeug/wsgi.py", line 256, in __next__
+    return self._next()
+           ~~~~~~~~~~^^
+  File "/usr/lib/python3/dist-packages/werkzeug/wrappers/response.py", line 32, in _iter_encoded
+    for item in iterable:
+                ^^^^^^^^
+  File "/home/nir/Desktop/server/audio_stream.py", line 129, in generate_audio_stream
+    raise RuntimeError(stderr or "Microphone stream ended unexpectedly")
+RuntimeError: arecord: main:850: audio open error: Device or resource busy
+INFO:audio_stream:Audio stream started (device=plughw:2,0, rate=16000, channels=1)
+INFO:audio_stream:Audio stream stopped
+INFO:werkzeug:192.168.1.106 - - [18/Jun/2026 23:23:56] "GET /audio_feed HTTP/1.1" 500 -
+ERROR:werkzeug:Error on request:
+Traceback (most recent call last):
+  File "/usr/lib/python3/dist-packages/werkzeug/serving.py", line 370, in run_wsgi
+    execute(self.server.app)
+    ~~~~~~~^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3/dist-packages/werkzeug/serving.py", line 333, in execute
+    for data in application_iter:
+                ^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3/dist-packages/werkzeug/wsgi.py", line 256, in __next__
+    return self._next()
+           ~~~~~~~~~~^^
+  File "/usr/lib/python3/dist-packages/werkzeug/wrappers/response.py", line 32, in _iter_encoded
+    for item in iterable:
+                ^^^^^^^^
+  File "/home/nir/Desktop/server/audio_stream.py", line 129, in generate_audio_stream
+    raise RuntimeError(stderr or "Microphone stream ended unexpectedly")
+RuntimeError: arecord: main:850: audio open error: Device or resource busy
+^CINFO:audio_stream:Audio stream stopped
+ERROR:werkzeug:Error on request:
+Traceback (most recent call last):
+  File "/usr/lib/python3/dist-packages/werkzeug/serving.py", line 370, in run_wsgi
+    execute(self.server.app)
+    ~~~~~~~^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3/dist-packages/werkzeug/serving.py", line 333, in execute
+    for data in application_iter:
+                ^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3/dist-packages/werkzeug/wsgi.py", line 256, in __next__
+    return self._next()
+           ~~~~~~~~~~^^
+  File "/usr/lib/python3/dist-packages/werkzeug/wrappers/response.py", line 32, in _iter_encoded
+    for item in iterable:
+                ^^^^^^^^
+  File "/home/nir/Desktop/server/audio_stream.py", line 129, in generate_audio_stream
+    raise RuntimeError(stderr or "Microphone stream ended unexpectedly")
+RuntimeError: arecord: pcm_read:2272: read error: Interrupted system call
+INFO:picamera2.picamera2:Camera stopped
+INFO:picamera2.picamera2:Camera closed successfully
