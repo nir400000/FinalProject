@@ -1,3 +1,4 @@
 {
-  "tailscale_ip": "100.106.97.1"
+  "tailscale_ip": "100.106.97.1",
+  "audio_device": "plughw:2,0"
 }
