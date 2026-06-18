@@ -262,6 +262,26 @@ def remote_info():
     return get_remote_info_json(), 200, {"Content-Type": "application/json"}
 
 
+@app.route('/audio/info')
+def audio_info():
+    from audio_stream import get_audio_info
+
+    return jsonify(get_audio_info())
+
+
+@app.route('/audio_feed')
+def audio_feed():
+    from audio_stream import SAMPLE_RATE, generate_audio_stream
+
+    try:
+        return Response(
+            generate_audio_stream(),
+            mimetype=f"audio/L16; rate={SAMPLE_RATE}; channels=1",
+        )
+    except Exception as exc:
+        return jsonify({"ok": False, "error": str(exc)}), 503
+
+
 @app.route('/servo', methods=['GET', 'POST'])
 def servo_control():
     from servo_controller import get_status, init_servos, set_angles, step_angles
