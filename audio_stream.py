@@ -7,6 +7,7 @@ import logging
 import os
 import queue
 import re
+import struct
 import subprocess
 import threading
 from pathlib import Path
@@ -78,8 +79,9 @@ def get_audio_info() -> dict:
     return {
         "sample_rate": SAMPLE_RATE,
         "channels": CHANNELS,
-        "format": "S16_LE",
+        "format": "WAV/PCM S16_LE",
         "device": get_capture_device(),
+        "url_path": "/audio_feed",
     }
 
 
@@ -96,9 +98,34 @@ def _arecord_command(device: str) -> list[str]:
         str(CHANNELS),
         "-t",
         "raw",
+        "--period-size=1024",
+        "--buffer-size=4096",
         "-q",
         "-",
     ]
+
+
+def _create_wav_header(sample_rate: int, channels: int) -> bytes:
+    """44-byte WAV header for a continuous HTTP stream."""
+    bits_per_sample = 16
+    byte_rate = sample_rate * channels * (bits_per_sample // 8)
+    block_align = channels * (bits_per_sample // 8)
+    return struct.pack(
+        "<4sI4s4sIHHIIHH4sI",
+        b"RIFF",
+        0x7FFFFFFF,
+        b"WAVE",
+        b"fmt ",
+        16,
+        1,
+        channels,
+        sample_rate,
+        byte_rate,
+        block_align,
+        bits_per_sample,
+        b"data",
+        0x7FFFFFFF,
+    )
 
 
 class AudioCaptureHub:
@@ -231,9 +258,10 @@ class AudioCaptureHub:
 
 
 def generate_audio_stream() -> Iterator[bytes]:
-    """Yield PCM chunks from the shared microphone capture."""
+    """Yield WAV header then live PCM from the shared microphone capture."""
     hub = AudioCaptureHub.get()
     subscriber = hub.subscribe()
+    yield _create_wav_header(SAMPLE_RATE, CHANNELS)
     try:
         while True:
             chunk = subscriber.get()

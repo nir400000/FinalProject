@@ -271,12 +271,12 @@ def audio_info():
 
 @app.route('/audio_feed')
 def audio_feed():
-    from audio_stream import SAMPLE_RATE, generate_audio_stream
+    from audio_stream import generate_audio_stream
 
     try:
         return Response(
             generate_audio_stream(),
-            mimetype=f"audio/L16; rate={SAMPLE_RATE}; channels=1",
+            mimetype="audio/wav",
         )
     except Exception as exc:
         return jsonify({"ok": False, "error": str(exc)}), 503
