@@ -1,44 +1,34 @@
-import struct
-
-def _create_wav_header(sample_rate: int, channels: int) -> bytes:
-    """Generate a standard 44-byte WAV header for a continuous stream."""
-    bits_per_sample = 16
-    byte_rate = sample_rate * channels * (bits_per_sample // 8)
-    block_align = channels * (bits_per_sample // 8)
-    
-    # We use a massive file size (0x7FFFFFFF) because it's an endless stream.
-    header = struct.pack(
-        '<4sI4s4sIHHIIHH4sI',
-        b'RIFF',
-        0x7FFFFFFF,  # Chunk size
-        b'WAVE',
-        b'fmt ',
-        16,          # Subchunk1 size (16 for PCM)
-        1,           # Audio format (1 for PCM)
-        channels,
-        sample_rate,
-        byte_rate,
-        block_align,
-        bits_per_sample,
-        b'data',
-        0x7FFFFFFF   # Subchunk2 size
-    )
-    return header
-
-def generate_audio_stream() -> Iterator[bytes]:
-    """Yield WAV header, then PCM chunks from the shared capture."""
-    hub = AudioCaptureHub.get()
-    subscriber = hub.subscribe()
-    
-    # 1. Send the WAV header FIRST so the phone understands the format
-    yield _create_wav_header(SAMPLE_RATE, CHANNELS)
-    
-    # 2. Stream the raw PCM chunks
-    try:
-        while True:
-            chunk = subscriber.get()
-            if chunk is None:
-                break
-            yield chunk
-    finally:
-        hub.unsubscribe(subscriber)
+(venv) nir@BabyMonitor:~/Desktop/server $ python web_server.py 
+[1:54:30.821663913] [10196]  INFO Camera camera_manager.cpp:330 libcamera v0.5.2+99-bfd68f78
+[1:54:30.831177358] [10229]  INFO RPI pisp.cpp:720 libpisp version 1.3.0
+[1:54:30.833743881] [10229]  INFO IPAProxy ipa_proxy.cpp:180 Using tuning file /usr/share/libcamera/ipa/rpi/pisp/ov5647.json
+[1:54:30.843014284] [10229]  INFO Camera camera_manager.cpp:220 Adding camera '/base/axi/pcie@1000120000/rp1/i2c@88000/ov5647@36' for pipeline handler rpi/pisp
+[1:54:30.843049285] [10229]  INFO RPI pisp.cpp:1179 Registered camera /base/axi/pcie@1000120000/rp1/i2c@88000/ov5647@36 to CFE device /dev/media0 and ISP device /dev/media1 using PiSP variant BCM2712_C0
+[1:54:30.848096644] [10196]  INFO Camera camera.cpp:1215 configuring streams: (0) 640x480-XRGB8888/sRGB (1) 640x480-GBRG_PISP_COMP1/RAW
+[1:54:30.848300074] [10229]  INFO RPI pisp.cpp:1483 Sensor: /base/axi/pcie@1000120000/rp1/i2c@88000/ov5647@36 - Selected sensor format: 640x480-SGBRG10_1X10/RAW - Selected CFE format: 640x480-PC1g/RAW
+BLE Wi-Fi provisioning started (advertising as BabyMonitor)
+ * Serving Flask app 'web_server'
+ * Debug mode: off
+INFO:werkzeug:WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5001
+ * Running on http://192.168.1.224:5001
+INFO:werkzeug:Press CTRL+C to quit
+INFO:ble_pairing_agent:Registered headless Bluetooth pairing agent
+INFO:ble_pairing_agent:Headless pairing agent is default (Just Works / auto-confirm)
+INFO:ble_wifi_provision:Starting BLE provisioning as 'BabyMonitor' on 2C:CF:67:9A:E7:F4
+2026-06-18 23:48:43,301 - bluezero.GATT - INFO - GATT application registered
+INFO:bluezero.GATT:GATT application registered
+Advertisement registered
+INFO:werkzeug:192.168.1.106 - - [18/Jun/2026 23:49:07] "GET /health HTTP/1.1" 200 -
+INFO:werkzeug:192.168.1.106 - - [18/Jun/2026 23:49:08] "GET /video_feed?t=1781815748016 HTTP/1.1" 200 -
+INFO:werkzeug:192.168.1.106 - - [18/Jun/2026 23:49:08] "GET /favicon.ico HTTP/1.1" 404 -
+INFO:audio_stream:Using microphone device: plughw:2,0
+INFO:audio_stream:Audio capture started (device=plughw:2,0, rate=16000, channels=1)
+INFO:werkzeug:192.168.1.106 - - [18/Jun/2026 23:49:10] "GET /audio_feed HTTP/1.1" 200 -
+INFO:werkzeug:192.168.1.106 - - [18/Jun/2026 23:49:21] "GET /health HTTP/1.1" 200 -
+INFO:werkzeug:192.168.1.106 - - [18/Jun/2026 23:49:21] "GET /video_feed?t=1781815761522 HTTP/1.1" 200 -
+WARNING:audio_stream:Microphone capture ended: arecord: pcm_read:2272: read error: Interrupted system call
+INFO:audio_stream:Audio capture stopped
+^CINFO:picamera2.picamera2:Camera stopped
+INFO:picamera2.picamera2:Camera closed successfully.
