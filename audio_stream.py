@@ -17,7 +17,8 @@ logger = logging.getLogger(__name__)
 
 SAMPLE_RATE = 16000
 CHANNELS = 1
-CHUNK_SIZE = 2048
+CHUNK_SIZE = 4096
+SUBSCRIBER_QUEUE_SIZE = 160
 CONFIG_PATH = Path(__file__).resolve().parent / "device_config.json"
 
 _resolved_device: str | None = None
@@ -139,7 +140,7 @@ class AudioCaptureHub:
 
     def subscribe(self) -> queue.Queue[bytes]:
         self.ensure_running()
-        subscriber: queue.Queue[bytes] = queue.Queue(maxsize=64)
+        subscriber: queue.Queue[bytes] = queue.Queue(maxsize=SUBSCRIBER_QUEUE_SIZE)
         with self._hub_lock:
             self._subscribers.append(subscriber)
         return subscriber
@@ -178,17 +179,7 @@ class AudioCaptureHub:
                     with self._hub_lock:
                         subscribers = list(self._subscribers)
                     for subscriber in subscribers:
-                        try:
-                            subscriber.put_nowait(chunk)
-                        except queue.Full:
-                            try:
-                                subscriber.get_nowait()
-                            except queue.Empty:
-                                pass
-                            try:
-                                subscriber.put_nowait(chunk)
-                            except queue.Full:
-                                pass
+                        subscriber.put(chunk, block=True)
             finally:
                 with self._hub_lock:
                     self._kill_proc()
