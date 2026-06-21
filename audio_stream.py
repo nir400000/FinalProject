@@ -17,9 +17,10 @@ logger = logging.getLogger(__name__)
 
 SAMPLE_RATE = 16000
 CHANNELS = 1
-CHUNK_SIZE = 1024
-CAPTURE_QUEUE_SIZE = 120
-SUBSCRIBER_QUEUE_SIZE = 80
+# 4096 frames ≈ 256 ms at 16 kHz; larger buffers reduce crackling on Pi (see PortAudio/PyAudio notes).
+CHUNK_SIZE = 4096
+CAPTURE_QUEUE_SIZE = 32
+SUBSCRIBER_QUEUE_SIZE = 32
 CONFIG_PATH = Path(__file__).resolve().parent / "device_config.json"
 
 _resolved_device: str | None = None
@@ -165,8 +166,8 @@ def _arecord_command(device: str) -> list[str]:
         str(CHANNELS),
         "-t",
         "raw",
-        "--period-size=1024",
-        "--buffer-size=4096",
+        "--period-size=4096",
+        "--buffer-size=16384",
         "-q",
         "-",
     ]
