@@ -1,6 +1,7 @@
 from flask import Flask, Response, jsonify, request
 from frame_buffer import update_frame
 from sleep_tracker import get_sleep_tracker, STATE_AWAKE, STATE_OUT, STATE_SLEEPING
+from inference_gate import get_inference_gate
 import cv2
 from picamera2 import Picamera2
 import numpy as np
@@ -74,6 +75,7 @@ def _inference_worker():
         
         lbl = classify_pose(scaled_kps)
         sleep_state = get_sleep_tracker().update(scaled_kps, lbl, now)
+        get_inference_gate().mark_inferred()
         with _inference_state['state_lock']:
             _inference_state['last_kps'] = scaled_kps
             _inference_state['last_label'] = lbl
@@ -167,7 +169,10 @@ def generate_frames():
     one_in_Xframes = 1
     frame_count = 0
     last_display_time = time.time()
+    last_tracker_tick = 0.0
+    tracker_tick_interval = 0.5
     fps = 0.0
+    gate = get_inference_gate()
     
     # Start inference worker if not running
     if _inference_state['worker'] is None or not _inference_state['worker'].is_alive():
@@ -181,12 +186,26 @@ def generate_frames():
         frame_bgr = np.ascontiguousarray(frame_xrgb[:, :, :3])
         update_frame(frame_bgr)
         
-        # Post frame for inference worker
+        with _inference_state['state_lock']:
+            person_visible = _inference_state.get('sleep_state', STATE_OUT) != STATE_OUT
+
+        now = time.time()
+        run_yolo = False
         if frame_count % one_in_Xframes == 0:
-            with _inference_state['state_lock']:
-                _inference_state['frame_for_inference'] = frame_bgr.copy()
-                _inference_state['frame_w'] = frame_bgr.shape[1]
-                _inference_state['frame_h'] = frame_bgr.shape[0]
+            run_yolo = gate.should_run_inference(frame_bgr, person_visible=person_visible)
+            if run_yolo:
+                with _inference_state['state_lock']:
+                    _inference_state['frame_for_inference'] = frame_bgr.copy()
+                    _inference_state['frame_w'] = frame_bgr.shape[1]
+                    _inference_state['frame_h'] = frame_bgr.shape[0]
+            elif now - last_tracker_tick >= tracker_tick_interval:
+                with _inference_state['state_lock']:
+                    cached_kps = list(_inference_state.get('last_kps') or [])
+                    cached_label = _inference_state.get('last_label', 'unknown')
+                sleep_state = get_sleep_tracker().update(cached_kps, cached_label, now)
+                with _inference_state['state_lock']:
+                    _inference_state['sleep_state'] = sleep_state
+                last_tracker_tick = now
         
         frame_count += 1
         
