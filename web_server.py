@@ -81,6 +81,10 @@ def _inference_worker():
             _inference_state['last_label'] = lbl
             _inference_state['sleep_state'] = sleep_state
 
+        from auto_tracker import update as auto_track_update
+
+        auto_track_update(scaled_kps, orig_w, orig_h)
+
 def get_yolo_keypoints(results):
     """
     Extracts keypoints from YOLO results ensuring compatibility with your logic.
@@ -170,7 +174,9 @@ def generate_frames():
     frame_count = 0
     last_display_time = time.time()
     last_tracker_tick = 0.0
+    last_auto_track = 0.0
     tracker_tick_interval = 0.5
+    auto_track_interval = 0.15
     fps = 0.0
     gate = get_inference_gate()
     
@@ -206,6 +212,14 @@ def generate_frames():
                 with _inference_state['state_lock']:
                     _inference_state['sleep_state'] = sleep_state
                 last_tracker_tick = now
+
+        from auto_tracker import is_enabled as auto_track_enabled, update as auto_track_update
+
+        if auto_track_enabled() and now - last_auto_track >= auto_track_interval:
+            with _inference_state['state_lock']:
+                track_kps = list(_inference_state.get('last_kps') or [])
+            auto_track_update(track_kps, frame_bgr.shape[1], frame_bgr.shape[0])
+            last_auto_track = now
         
         frame_count += 1
         
@@ -303,14 +317,23 @@ def audio_feed():
 
 @app.route('/servo', methods=['GET', 'POST'])
 def servo_control():
+    from auto_tracker import get_status as auto_track_status, is_enabled, set_enabled
     from servo_controller import get_status, init_servos, set_angles, step_angles
 
     if request.method == 'GET':
         init_servos()
-        return jsonify(get_status())
+        return jsonify({**get_status(), **auto_track_status()})
 
     data = request.get_json(force=True, silent=True) or {}
     try:
+        if 'auto_track' in data:
+            set_enabled(bool(data['auto_track']))
+            init_servos()
+            return jsonify({"ok": True, **get_status(), **auto_track_status()})
+
+        if is_enabled() and ('pan_delta' in data or 'tilt_delta' in data):
+            return jsonify({"ok": False, "error": "Auto track is enabled"}), 409
+
         if 'pan_delta' in data or 'tilt_delta' in data:
             result = step_angles(
                 data.get('pan_delta', 0),
@@ -318,7 +341,7 @@ def servo_control():
             )
         else:
             result = set_angles(data.get('pan', 0), data.get('tilt', 0))
-        return jsonify({"ok": True, **result})
+        return jsonify({"ok": True, **result, **auto_track_status()})
     except RuntimeError as exc:
         return jsonify({"ok": False, "error": str(exc)}), 503
     except (TypeError, ValueError) as exc:
