@@ -348,6 +348,13 @@ def servo_control():
         return jsonify({"ok": False, "error": str(exc)}), 400
 
 
+@app.route('/cry/status')
+def cry_status():
+    from cry_detector import get_status
+
+    return jsonify(get_status())
+
+
 @app.route('/')
 def home():
     return '<h1>Baby Monitor</h1><img src="/video_feed" style="width:640px; height:480px;" />'
@@ -366,7 +373,13 @@ if __name__ == '__main__':
 
         try:
             from audio_stream import start_capture_hub, shutdown_capture_hub
+            from cry_detector import init_cry_detector
+
             start_capture_hub()
+            if init_cry_detector():
+                print('Baby cry detection (YAMNet) ready')
+            else:
+                print('Baby cry detection unavailable — run scripts/download_yamnet.py')
             print('Nursery microphone capture started')
         except Exception as audio_exc:
             print(f'Nursery microphone not available: {audio_exc}')

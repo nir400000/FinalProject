@@ -201,6 +201,13 @@ def _fanout_chunk(subscribers: list[queue.Queue[bytes]], chunk: bytes) -> None:
             except queue.Full:
                 pass
 
+    try:
+        from cry_detector import feed_pcm
+
+        feed_pcm(chunk)
+    except Exception:
+        pass
+
 
 class AudioCaptureHub:
     """Single mic capture shared by all listeners; capture never waits on network."""
