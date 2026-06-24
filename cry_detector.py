@@ -57,10 +57,21 @@ def _load_interpreter() -> bool:
         return False
 
     try:
+        Interpreter = None
+        backend = "unknown"
         try:
-            from tflite_runtime.interpreter import Interpreter
+            from ai_edge_litert.interpreter import Interpreter
+
+            backend = "ai-edge-litert"
         except ImportError:
-            from tensorflow.lite.python.interpreter import Interpreter  # type: ignore
+            try:
+                from tflite_runtime.interpreter import Interpreter
+
+                backend = "tflite-runtime"
+            except ImportError:
+                from tensorflow.lite.python.interpreter import Interpreter  # type: ignore
+
+                backend = "tensorflow"
 
         interpreter = Interpreter(model_path=str(MODEL_PATH))
         interpreter.allocate_tensors()
@@ -73,7 +84,7 @@ def _load_interpreter() -> bool:
         shape = input_details[0].get("shape")
         _input_2d = bool(shape is not None and len(shape) == 2)
         _available = True
-        logger.info("YAMNet cry detector loaded (%s)", MODEL_PATH.name)
+        logger.info("YAMNet cry detector loaded (%s via %s)", MODEL_PATH.name, backend)
         return True
     except Exception as exc:
         logger.warning("YAMNet cry detector unavailable: %s", exc)

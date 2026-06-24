@@ -1,7 +1,6 @@
 flask
 numpy
 opencv-python
-mediapipe
 picamera2
 pyaudio
-tflite-runtime; platform_machine == "aarch64" or platform_machine == "armv7l"
+ai-edge-litert
