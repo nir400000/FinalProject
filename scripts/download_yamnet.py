@@ -7,10 +7,7 @@ import sys
 import urllib.request
 from pathlib import Path
 
-MODEL_URL = (
-    "https://storage.googleapis.com/tfhub-lite-models/"
-    "google/yamnet/classification/tflite/1.tflite"
-)
+MODEL_URL = "https://storage.googleapis.com/mediapipe-models/audio_classifier/yamnet/float32/1/yamnet.tflite"
 ROOT = Path(__file__).resolve().parent.parent
 MODEL_DIR = ROOT / "models"
 MODEL_PATH = MODEL_DIR / "yamnet.tflite"
