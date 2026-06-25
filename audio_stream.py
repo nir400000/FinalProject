@@ -208,6 +208,13 @@ def _fanout_chunk(subscribers: list[queue.Queue[bytes]], chunk: bytes) -> None:
     except Exception as exc:
         logger.debug("Cry detector feed failed: %s", exc)
 
+    try:
+        from sound_meter import feed_pcm as feed_sound
+
+        feed_sound(chunk)
+    except Exception as exc:
+        logger.debug("Sound meter feed failed: %s", exc)
+
 
 class AudioCaptureHub:
     """Single mic capture shared by all listeners; capture never waits on network."""

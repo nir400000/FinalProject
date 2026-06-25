@@ -38,8 +38,14 @@ class InferenceGate:
         return score
 
     def should_run_inference(self, frame_bgr: np.ndarray, *, person_visible: bool) -> bool:
-        now = time.time()
         score = self.motion_score(frame_bgr)
+        return self.should_run_inference_with_score(score, person_visible=person_visible)
+
+    def should_run_inference_with_score(
+        self, score: float, *, person_visible: bool
+    ) -> bool:
+        self.last_motion_score = score
+        now = time.time()
 
         if score >= MOTION_THRESHOLD:
             return True

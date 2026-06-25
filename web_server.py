@@ -195,10 +195,13 @@ def generate_frames():
         with _inference_state['state_lock']:
             person_visible = _inference_state.get('sleep_state', STATE_OUT) != STATE_OUT
 
+        motion_score = gate.motion_score(frame_bgr)
         now = time.time()
         run_yolo = False
         if frame_count % one_in_Xframes == 0:
-            run_yolo = gate.should_run_inference(frame_bgr, person_visible=person_visible)
+            run_yolo = gate.should_run_inference_with_score(
+                motion_score, person_visible=person_visible
+            )
             if run_yolo:
                 with _inference_state['state_lock']:
                     _inference_state['frame_for_inference'] = frame_bgr.copy()
@@ -346,6 +349,16 @@ def servo_control():
         return jsonify({"ok": False, "error": str(exc)}), 503
     except (TypeError, ValueError) as exc:
         return jsonify({"ok": False, "error": str(exc)}), 400
+
+
+@app.route('/alerts/snapshot')
+def alerts_snapshot():
+    from alert_snapshot import get_alert_snapshot
+
+    response = jsonify(get_alert_snapshot(_inference_state))
+    response.headers["Cache-Control"] = "no-store, no-cache, must-revalidate"
+    response.headers["Pragma"] = "no-cache"
+    return response
 
 
 @app.route('/cry/status')
