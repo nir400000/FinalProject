@@ -8,8 +8,8 @@ import urllib.request
 from pathlib import Path
 
 MODEL_URL = (
-    "https://storage.googleapis.com/tfhub-lite-models/"
-    "google/yamnet/classification/tflite/1.tflite"
+    "https://storage.googleapis.com/mediapipe-models/"
+    "audio_classifier/yamnet/float32/1/yamnet.tflite"
 )
 CLASS_MAP_URL = (
     "https://raw.githubusercontent.com/tensorflow/models/master/"

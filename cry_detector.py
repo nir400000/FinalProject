@@ -18,12 +18,12 @@ PATCH_BYTES = PATCH_SAMPLES * 2
 
 # AudioSet / YAMNet class indices
 CLASS_BABY_CRY = 20
-CLASS_CRYING = 21
+CLASS_CRYING = 19
 CRY_CLASSES = (CLASS_BABY_CRY, CLASS_CRYING)
 
 MODEL_PATH = Path(__file__).resolve().parent / "models" / "yamnet.tflite"
 CLASS_MAP_PATH = Path(__file__).resolve().parent / "models" / "yamnet_class_map.csv"
-SCORE_THRESHOLD = 0.45
+SCORE_THRESHOLD = 0.3
 CLEAR_THRESHOLD = 0.30
 CONFIRM_HITS = 2
 CLEAR_SEC = 5.0
