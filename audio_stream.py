@@ -205,8 +205,8 @@ def _fanout_chunk(subscribers: list[queue.Queue[bytes]], chunk: bytes) -> None:
         from cry_detector import feed_pcm
 
         feed_pcm(chunk)
-    except Exception:
-        pass
+    except Exception as exc:
+        logger.debug("Cry detector feed failed: %s", exc)
 
 
 class AudioCaptureHub:
@@ -348,8 +348,7 @@ class AudioCaptureHub:
 
             with self._hub_lock:
                 subscribers = list(self._subscribers)
-            if subscribers:
-                _fanout_chunk(subscribers, chunk)
+            _fanout_chunk(subscribers, chunk)
 
     def _arecord_loop(self) -> None:
         while True:
