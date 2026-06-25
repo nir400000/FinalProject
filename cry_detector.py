@@ -141,12 +141,16 @@ def _set_state(crying: bool, score: float, label: str, now: float) -> None:
 
 
 def _update_state(score: float, now: float) -> None:
-    global _high_hits
+    global _high_hits, _score, _label
+
+    _score = score
 
     if score >= SCORE_THRESHOLD:
         _high_hits += 1
         if _high_hits >= CONFIRM_HITS:
             _set_state(True, score, "baby_cry", now)
+        else:
+            _label = "possible_cry"
         return
 
     _high_hits = 0
@@ -154,10 +158,8 @@ def _update_state(score: float, now: float) -> None:
         if score <= CLEAR_THRESHOLD and (now - (_since or now)) >= CLEAR_SEC:
             _set_state(False, score, "quiet", now)
         else:
-            _score = score
             _label = "baby_cry"
     else:
-        _score = score
         _label = "quiet"
 
 
@@ -185,6 +187,7 @@ def get_status() -> Dict:
             "score": round(_score, 3),
             "label": _label,
             "since": _since,
+            "updated_at": _last_detect_ts,
             "threshold": SCORE_THRESHOLD,
             "model": str(MODEL_PATH.name) if MODEL_PATH.is_file() else None,
         }

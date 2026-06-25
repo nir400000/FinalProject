@@ -352,7 +352,10 @@ def servo_control():
 def cry_status():
     from cry_detector import get_status
 
-    return jsonify(get_status())
+    response = jsonify(get_status())
+    response.headers["Cache-Control"] = "no-store, no-cache, must-revalidate"
+    response.headers["Pragma"] = "no-cache"
+    return response
 
 
 @app.route('/')
