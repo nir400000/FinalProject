@@ -1,0 +1,6 @@
+# Passwordless nmcli for BLE Wi-Fi setup (alternative to polkit rule).
+# Install: sudo cp babymonitor-nmcli /etc/sudoers.d/babymonitor-nmcli
+#          sudo chmod 440 /etc/sudoers.d/babymonitor-nmcli
+# Replace USER with your Pi username (e.g. pi or nir).
+
+USER ALL=(root) NOPASSWD: /usr/bin/nmcli
