@@ -571,4 +571,4 @@ When writing a formal report from this document, consider structuring as:
 
 ---
 
-*Document version: June 2025 — Smart Baby Monitor final project, JCE.*
+*Document version: June 2026 — Smart Baby Monitor final project, JCE.*
