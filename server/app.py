@@ -65,7 +65,7 @@ def _inference_worker() -> None:
             continue
 
         now = time.time()
-        min_interval = 0.30 if auto_track_enabled() else 0.12
+        min_interval = 0.25 if auto_track_enabled() else 0.12
         if now - last_infer < min_interval:
             continue
         last_infer = now
@@ -104,6 +104,7 @@ def generate_frames():
     tracker_tick_interval = 0.5
     fps = 0.0
     gate = get_inference_gate()
+    last_person_visible = False
 
     if _inference_state["worker"] is None or not _inference_state["worker"].is_alive():
         _inference_state["stop_event"].clear()
@@ -119,6 +120,10 @@ def generate_frames():
 
         with _inference_state["state_lock"]:
             person_visible = _inference_state.get("sleep_state", STATE_OUT) != STATE_OUT
+
+        if auto_track_enabled() and person_visible and not last_person_visible:
+            gate.request_immediate_inference()
+        last_person_visible = person_visible
 
         motion_score = gate.motion_score(frame_bgr)
         now = time.time()

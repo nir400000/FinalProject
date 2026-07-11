@@ -18,19 +18,24 @@ TORSO_INDICES = (0, 5, 6, 11, 12)
 # OV5647 / stream is 640x480; horizontal FOV ~75°.
 HFOV_DEG = 75.0
 
-# One servo step per fresh YOLO frame (~3 Hz while auto track is on).
-STEP_FRACTION_FAR = 0.30
+# One servo step per fresh YOLO frame (~3.5 Hz while auto track is on).
+# Fast when far off-center (acquisition); gentle near center to avoid oscillation.
+ACQUIRE_ERROR_DEG = 12.0
+STEP_FRACTION_ACQUIRE = 0.42
+MAX_STEP_DEG_ACQUIRE = 3.2
+
+STEP_FRACTION_FAR = 0.34
 STEP_FRACTION_NEAR = 0.18
-MAX_STEP_DEG_FAR = 2.2
+MAX_STEP_DEG_FAR = 2.6
 MAX_STEP_DEG_NEAR = 0.85
-FAR_ERROR_DEG = 8.0
+FAR_ERROR_DEG = 6.0
 NEAR_ERROR_DEG = 3.5
 
 ENTER_DEADZONE_DEG = 3.0
 EXIT_DEADZONE_DEG = 5.0
 SETTLE_TICKS = 2
 
-SMOOTH_ALPHA_FAR = 0.35
+SMOOTH_ALPHA_FAR = 0.45
 SMOOTH_ALPHA_NEAR = 0.18
 
 _lock = threading.Lock()
@@ -105,6 +110,10 @@ def _centroid(
 def _smooth_centroid(cx: float, cy: float, error_mag_deg: float) -> Tuple[float, float]:
     global _smooth_cx, _smooth_cy
 
+    if error_mag_deg >= ACQUIRE_ERROR_DEG:
+        _smooth_cx, _smooth_cy = cx, cy
+        return cx, cy
+
     if error_mag_deg >= FAR_ERROR_DEG:
         alpha = SMOOTH_ALPHA_FAR
     elif error_mag_deg <= NEAR_ERROR_DEG:
@@ -126,7 +135,10 @@ def _correction_to_step(correction_deg: float) -> float:
     if abs_err < 1e-6:
         return 0.0
 
-    if abs_err >= FAR_ERROR_DEG:
+    if abs_err >= ACQUIRE_ERROR_DEG:
+        fraction = STEP_FRACTION_ACQUIRE
+        max_step = MAX_STEP_DEG_ACQUIRE
+    elif abs_err >= FAR_ERROR_DEG:
         fraction = STEP_FRACTION_FAR
         max_step = MAX_STEP_DEG_FAR
     elif abs_err <= NEAR_ERROR_DEG:

@@ -16,8 +16,8 @@ WATCHDOG_NO_PERSON_SEC = 4.0
 WATCHDOG_PERSON_STATIC_SEC = 12.0
 
 # When auto track is on, refresh pose often so gimbal moves use current keypoints.
-AUTO_TRACK_PERSON_SEC = 0.35
-AUTO_TRACK_NO_PERSON_SEC = 2.0
+AUTO_TRACK_PERSON_SEC = 0.28
+AUTO_TRACK_NO_PERSON_SEC = 1.5
 
 
 class InferenceGate:
@@ -29,6 +29,12 @@ class InferenceGate:
 
     def set_auto_track_active(self, active: bool) -> None:
         self._auto_track_active = bool(active)
+        if active:
+            self.request_immediate_inference()
+
+    def request_immediate_inference(self) -> None:
+        """Force the next frame through YOLO (e.g. auto track just turned on)."""
+        self._last_infer_time = 0.0
 
     def motion_score(self, frame_bgr: np.ndarray) -> float:
         small = cv2.cvtColor(
