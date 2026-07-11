@@ -91,8 +91,6 @@ def _inference_worker() -> None:
             _inference_state["last_label"] = lbl
             _inference_state["sleep_state"] = sleep_state
 
-        auto_track_update(scaled_kps, orig_w, orig_h)
-
 
 def generate_frames():
     frame_count = 0
@@ -100,7 +98,7 @@ def generate_frames():
     last_tracker_tick = 0.0
     last_auto_track = 0.0
     tracker_tick_interval = 0.5
-    auto_track_interval = 0.15
+    auto_track_interval = 0.08
     fps = 0.0
     gate = get_inference_gate()
 
