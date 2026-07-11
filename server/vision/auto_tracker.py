@@ -5,6 +5,7 @@ from __future__ import annotations
 import logging
 import math
 import threading
+import time
 from typing import Dict, List, Optional, Sequence, Tuple
 
 logger = logging.getLogger(__name__)
@@ -18,7 +19,14 @@ TORSO_INDICES = (0, 5, 6, 11, 12)
 # OV5647 / stream is 640x480; horizontal FOV ~75°.
 HFOV_DEG = 75.0
 
-# One servo step per fresh YOLO frame (~3.5 Hz while auto track is on).
+# Spread each YOLO correction across the time until the next pose update.
+# Keep in sync with inference_gate.AUTO_TRACK_PERSON_SEC (~0.28 s).
+TRACK_CYCLE_SEC = 0.25
+MICRO_STEP_INTERVAL_SEC = 0.05
+MAX_MICRO_STEP_DEG = 1.0
+MIN_MICRO_STEPS = 2
+MAX_MICRO_STEPS = 8
+
 # Fast when far off-center (acquisition); gentle near center to avoid oscillation.
 ACQUIRE_ERROR_DEG = 12.0
 STEP_FRACTION_ACQUIRE = 0.42
@@ -44,16 +52,18 @@ _smooth_cx: Optional[float] = None
 _smooth_cy: Optional[float] = None
 _settled = False
 _settle_count = 0
+_sweep_generation = 0
 
 
 def set_enabled(value: bool) -> None:
-    global _enabled, _smooth_cx, _smooth_cy, _settled, _settle_count
+    global _enabled, _smooth_cx, _smooth_cy, _settled, _settle_count, _sweep_generation
     with _lock:
         _enabled = bool(value)
         _smooth_cx = None
         _smooth_cy = None
         _settled = False
         _settle_count = 0
+        _sweep_generation += 1
     from server.vision.inference_gate import get_inference_gate
 
     get_inference_gate().set_auto_track_active(bool(value))
@@ -153,6 +163,53 @@ def _correction_to_step(correction_deg: float) -> float:
     return max(-max_step, min(max_step, step))
 
 
+def _plan_micro_steps(pan_total: float, tilt_total: float) -> Tuple[int, float, float]:
+    """Split one correction into several timed micro-steps before the next YOLO frame."""
+    steps_by_time = max(1, int(TRACK_CYCLE_SEC / MICRO_STEP_INTERVAL_SEC))
+    max_axis = max(abs(pan_total), abs(tilt_total))
+    if max_axis > 1e-6:
+        steps_by_size = max(1, math.ceil(max_axis / MAX_MICRO_STEP_DEG))
+    else:
+        steps_by_size = 1
+
+    count = max(steps_by_time, steps_by_size)
+    count = max(MIN_MICRO_STEPS, min(MAX_MICRO_STEPS, count))
+    return count, pan_total / count, tilt_total / count
+
+
+def _micro_sweep_worker(
+    pan_total: float,
+    tilt_total: float,
+    generation: int,
+) -> None:
+    from server.hardware.servo_controller import step_angles
+
+    count, pan_step, tilt_step = _plan_micro_steps(pan_total, tilt_total)
+    for index in range(count):
+        if generation != _sweep_generation or not is_enabled():
+            return
+        try:
+            step_angles(pan_step, tilt_step)
+        except RuntimeError as exc:
+            logger.debug("Auto track micro-step skipped: %s", exc)
+            return
+        if index < count - 1:
+            time.sleep(MICRO_STEP_INTERVAL_SEC)
+
+
+def _schedule_micro_sweep(pan_total: float, tilt_total: float) -> None:
+    global _sweep_generation
+    _sweep_generation += 1
+    generation = _sweep_generation
+    thread = threading.Thread(
+        target=_micro_sweep_worker,
+        args=(pan_total, tilt_total, generation),
+        daemon=True,
+        name="auto-track-sweep",
+    )
+    thread.start()
+
+
 def update(
     keypoints: List[Tuple[float, float, float]],
     frame_w: int,
@@ -214,9 +271,4 @@ def update(
     if abs(pan_delta) < 1e-6 and abs(tilt_delta) < 1e-6:
         return
 
-    from server.hardware.servo_controller import step_angles
-
-    try:
-        step_angles(pan_delta, tilt_delta)
-    except RuntimeError as exc:
-        logger.debug("Auto track servo step skipped: %s", exc)
+    _schedule_micro_sweep(pan_delta, tilt_delta)
