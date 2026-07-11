@@ -18,22 +18,20 @@ TORSO_INDICES = (0, 5, 6, 11, 12)
 # OV5647 / stream is 640x480; horizontal FOV ~75°.
 HFOV_DEG = 75.0
 
-# Faster correction when the subject is far from center; gentle near center.
-STEP_FRACTION_FAR = 0.38
-STEP_FRACTION_NEAR = 0.14
-MAX_STEP_DEG_FAR = 2.8
-MAX_STEP_DEG_NEAR = 0.55
-FAR_ERROR_DEG = 9.0
-NEAR_ERROR_DEG = 4.0
+# One servo step per fresh YOLO frame (~3 Hz while auto track is on).
+STEP_FRACTION_FAR = 0.30
+STEP_FRACTION_NEAR = 0.18
+MAX_STEP_DEG_FAR = 2.2
+MAX_STEP_DEG_NEAR = 0.85
+FAR_ERROR_DEG = 8.0
+NEAR_ERROR_DEG = 3.5
 
-# Hysteresis dead zone — enter when centered, require larger error to resume.
-ENTER_DEADZONE_DEG = 2.6
-EXIT_DEADZONE_DEG = 5.5
+ENTER_DEADZONE_DEG = 3.0
+EXIT_DEADZONE_DEG = 5.0
 SETTLE_TICKS = 2
 
-# Smoothing: responsive while tracking motion, heavy filter when nearly centered.
-SMOOTH_ALPHA_FAR = 0.42
-SMOOTH_ALPHA_NEAR = 0.10
+SMOOTH_ALPHA_FAR = 0.35
+SMOOTH_ALPHA_NEAR = 0.18
 
 _lock = threading.Lock()
 _enabled = False
@@ -51,6 +49,9 @@ def set_enabled(value: bool) -> None:
         _smooth_cy = None
         _settled = False
         _settle_count = 0
+    from server.vision.inference_gate import get_inference_gate
+
+    get_inference_gate().set_auto_track_active(bool(value))
     logger.info("Auto track %s", "enabled" if value else "disabled")
 
 

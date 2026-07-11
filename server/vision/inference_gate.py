@@ -11,9 +11,13 @@ import numpy as np
 MOTION_SIZE = (160, 120)
 MOTION_THRESHOLD = 4.0
 
-# Re-run YOLO occasionally even when the scene looks static.
+# Re-run YOLO occasionally even when the scene looks static (auto track off).
 WATCHDOG_NO_PERSON_SEC = 4.0
 WATCHDOG_PERSON_STATIC_SEC = 12.0
+
+# When auto track is on, refresh pose often so gimbal moves use current keypoints.
+AUTO_TRACK_PERSON_SEC = 0.35
+AUTO_TRACK_NO_PERSON_SEC = 2.0
 
 
 class InferenceGate:
@@ -21,6 +25,10 @@ class InferenceGate:
         self._prev_gray: np.ndarray | None = None
         self._last_infer_time = 0.0
         self.last_motion_score = 0.0
+        self._auto_track_active = False
+
+    def set_auto_track_active(self, active: bool) -> None:
+        self._auto_track_active = bool(active)
 
     def motion_score(self, frame_bgr: np.ndarray) -> float:
         small = cv2.cvtColor(
@@ -51,7 +59,14 @@ class InferenceGate:
             return True
 
         elapsed = now - self._last_infer_time
-        watchdog = WATCHDOG_PERSON_STATIC_SEC if person_visible else WATCHDOG_NO_PERSON_SEC
+        if self._auto_track_active:
+            watchdog = (
+                AUTO_TRACK_PERSON_SEC if person_visible else AUTO_TRACK_NO_PERSON_SEC
+            )
+        else:
+            watchdog = (
+                WATCHDOG_PERSON_STATIC_SEC if person_visible else WATCHDOG_NO_PERSON_SEC
+            )
         return elapsed >= watchdog
 
     def mark_inferred(self) -> None:

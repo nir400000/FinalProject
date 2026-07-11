@@ -38,6 +38,7 @@ model = YOLO(str(YOLO_MODEL_PATH))
 _inference_state = {
     "frame_for_inference": None,
     "last_kps": [],
+    "last_kps_time": 0.0,
     "last_label": "unknown",
     "sleep_state": STATE_OUT,
     "stop_event": threading.Event(),
@@ -48,7 +49,6 @@ _inference_state = {
 
 def _inference_worker() -> None:
     inference_size = (320, 240)
-    min_inference_interval = 0.08
     last_infer = 0.0
 
     while not _inference_state["stop_event"].is_set():
@@ -65,7 +65,8 @@ def _inference_worker() -> None:
             continue
 
         now = time.time()
-        if now - last_infer < min_inference_interval:
+        min_interval = 0.30 if auto_track_enabled() else 0.12
+        if now - last_infer < min_interval:
             continue
         last_infer = now
 
@@ -90,15 +91,17 @@ def _inference_worker() -> None:
             _inference_state["last_kps"] = scaled_kps
             _inference_state["last_label"] = lbl
             _inference_state["sleep_state"] = sleep_state
+            _inference_state["last_kps_time"] = now
+
+        if auto_track_enabled():
+            auto_track_update(scaled_kps, orig_w, orig_h)
 
 
 def generate_frames():
     frame_count = 0
     last_display_time = time.time()
     last_tracker_tick = 0.0
-    last_auto_track = 0.0
     tracker_tick_interval = 0.5
-    auto_track_interval = 0.08
     fps = 0.0
     gate = get_inference_gate()
 
@@ -136,12 +139,6 @@ def generate_frames():
                 with _inference_state["state_lock"]:
                     _inference_state["sleep_state"] = sleep_state
                 last_tracker_tick = now
-
-        if auto_track_enabled() and now - last_auto_track >= auto_track_interval:
-            with _inference_state["state_lock"]:
-                track_kps = list(_inference_state.get("last_kps") or [])
-            auto_track_update(track_kps, frame_bgr.shape[1], frame_bgr.shape[0])
-            last_auto_track = now
 
         frame_count += 1
 
