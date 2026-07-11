@@ -135,7 +135,11 @@ def main():
         "feature_names": feature_names(),
     }
     joblib.dump(bundle, MODEL_PATH)
-    print(f"\n✅ Model saved to: {MODEL_PATH}")
+    models_path = os.path.join(os.path.dirname(SCRIPT_DIR), "models", "pose_classifier.joblib")
+    os.makedirs(os.path.dirname(models_path), exist_ok=True)
+    joblib.dump(bundle, models_path)
+    print(f"\nModel saved to: {MODEL_PATH}")
+    print(f"Model copied to: {models_path}")
     print("You can now run: python webcam_pose_tester.py")
 
 

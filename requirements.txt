@@ -4,3 +4,6 @@ opencv-python
 picamera2
 pyaudio
 ai-edge-litert
+scikit-learn
+joblib
+ultralytics
